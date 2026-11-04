@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de marca. @theme los expone como utilidades de Tailwind
+ * (bg-ink, text-paper, border-line…) y como variables CSS (--color-ink…).
+ */
+@theme {
+  /* Primaria — Negro */
+  --color-ink: #191919;
+  --color-surface: #222222;
+  --color-line: #333333;
+  --color-star: #a9a9a9;
+  --color-paper: #f2f2f2;
+  --color-footer: #111111;
+
+  /* Secundaria — Slate */
+  --color-night: #21262a;
+  --color-night-surface: #2a3035;
+  --color-night-line: #3a4249;
+  --color-slate: #778898; /* solo elementos grandes o decorativos */
+  --color-slate-text: #9aa8b6;
+
+  /* Radios: repiten el contorno doble del logo */
+  --radius-btn: 14px;
+  --radius-card: 18px;
+  --radius-img: 22px;
+  --radius-tag: 8px;
+
+  --tracking-label: 0.16em;
+  --tracking-wide-label: 0.2em;
+  --tracking-display: -0.02em;
+}
+
+@theme inline {
+  --font-display: var(--font-archivo), "Arial Black", sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--color-ink);
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 768px) {
+    body { font-size: 15px; }
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-paper);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  ::selection { background: var(--color-paper); color: var(--color-ink); }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+}
+
+/* Títulos: Archivo 900 itálica, mayúsculas, apretados */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-display);
+  line-height: 0.92;
+  overflow-wrap: break-word; /* red de seguridad: una palabra que no entra se parte en vez de cortarse */
+}
+
+/* Labels, botones, precios: Space Mono en mayúsculas con tracking amplio */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  line-height: 1.4;
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  @media (min-width: 768px) { padding-inline: 32px; }
+}
+
+/* Botones */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide-label);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+/* Anillo doble que imita el contorno del logo. --ring = color del fondo donde está el botón */
+@utility btn-primary {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: 0 0 0 4px var(--ring, var(--color-ink)), 0 0 0 5.5px var(--color-star);
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+}
+@utility btn-secondary {
+  background: transparent;
+  color: var(--color-paper);
+  border: 1.5px solid var(--color-paper);
+  &:hover { background: var(--color-paper); color: var(--color-ink); }
+}
+
+/* Marquee de la cinta sticker */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track { animation: marquee 40s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
+/* ═══════════════════ Efectos y animaciones ═══════════════════
+   Regla de oro: todo lo que SE MUEVE vive dentro de `prefers-reduced-motion: no-preference`.
+   Fuera de eso (o sin JavaScript) todo se ve en su estado final y quieto. */
+
+/* Grano de película: textura muy sutil sobre todo el sitio (no tapa clics). */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Barra de progreso de lectura arriba de todo (mejora progresiva: solo donde el navegador lo soporta). */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 80;
+  height: 2px;
+  background: var(--color-paper);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+
+/* Brillo de fondo del hero; `Spotlight` mueve --sx / --sy con el mouse. */
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(560px circle at var(--sx, 50%) var(--sy, 36%), rgba(119, 136, 152, 0.18), transparent 62%);
+}
+
+/* Aparición al hacer scroll (la pone `Reveal`, solo si el movimiento está permitido). */
+[data-reveal="hidden"] { opacity: 0; transform: translateY(28px); }
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Botones: brillo que cruza al pasar el mouse. */
+.btn { position: relative; overflow: hidden; }
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(-130%);
+  background: linear-gradient(105deg, transparent 35%, rgba(25, 25, 25, 0.13) 50%, transparent 65%);
+  transition: transform 0.7s ease;
+}
+.btn-secondary::after { background: linear-gradient(105deg, transparent 35%, rgba(242, 242, 242, 0.16) 50%, transparent 65%); }
+.btn:hover::after { transform: translateX(130%); }
+
+/* Tarjetas del drop: inclinación 3D, giro y brillo. */
+.tilt { perspective: 1100px; }
+.tilt-inner {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.tilt:hover .tilt-inner { transition: transform 0.12s ease-out; }
+.card3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.card3d.is-flipped { transform: rotateY(180deg); }
+.face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face-back { position: absolute; inset: 0; transform: rotateY(180deg); }
+/* Chrome sigue mandando los clics a la cara que ya no se ve (la foto con filtro del frente tapaba la ✕ del dorso).
+   Solo la cara visible recibe clics: */
+.card3d.is-flipped .front { pointer-events: none; }
+.card3d:not(.is-flipped) .face-back { pointer-events: none; }
+.front { transition: border-color 0.3s ease, box-shadow 0.4s ease; }
+.tilt:hover .front { border-color: var(--color-slate); box-shadow: 0 18px 50px -18px rgba(119, 136, 152, 0.5); }
+.glare {
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgba(242, 242, 242, 0.17), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.tilt:hover .glare { opacity: 1; }
+.sheen, .scanline { position: absolute; pointer-events: none; }
+.sheen {
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgba(242, 242, 242, 0.07) 50%, transparent 62%);
+  transform: translateX(-130%);
+}
+.scanline {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 36px;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent, rgba(242, 242, 242, 0.09), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-inner, .card3d, .front, .btn::after { transition: none; }
+  .glare, .btn::after { display: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: none; } }
+  @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+  @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes sheen { 0% { transform: translateX(-130%); } 55%, 100% { transform: translateX(130%); } }
+  @keyframes scan { from { transform: translateY(-120%); } to { transform: translateY(540%); } }
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); text-shadow: none; }
+    25% { transform: translate(-2px, 1px); text-shadow: 3px 0 var(--color-slate), -3px 0 var(--color-paper); }
+    50% { transform: translate(2px, -1px); text-shadow: -3px 0 var(--color-slate), 3px 0 var(--color-paper); }
+    75% { transform: translate(-1px, 0); text-shadow: 2px 0 var(--color-slate); }
+  }
+  @keyframes ring-pulse {
+    0% { box-shadow: 0 0 0 4px var(--ring, var(--color-ink)), 0 0 0 5.5px var(--color-star), 0 0 0 5.5px rgba(169, 169, 169, 0.55); }
+    100% { box-shadow: 0 0 0 4px var(--ring, var(--color-ink)), 0 0 0 5.5px var(--color-star), 0 0 0 17px rgba(169, 169, 169, 0); }
+  }
+  @keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes grain { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-4%, 3%); } 40% { transform: translate(3%, -5%); } 60% { transform: translate(-5%, -2%); } 80% { transform: translate(4%, 4%); } }
+
+  .rise { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0s); }
+  .pop { animation: pop 1s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 0s); }
+  .floaty { animation: floaty 7s ease-in-out infinite; }
+  .twinkle { animation: twinkle 2.4s ease-in-out infinite; }
+  .pulse { animation: ring-pulse 2.6s ease-out infinite; }
+  .sheen { animation: sheen 7s ease-in-out infinite; animation-delay: var(--d, 0s); }
+  .tilt:hover .scanline { opacity: 1; animation: scan 2.4s linear infinite; }
+  .tilt:hover .q-mark { animation: glitch 0.6s steps(2, end) infinite; }
+  .grain { animation: grain 9s steps(8) infinite; }
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress { animation: progress linear both; animation-timeline: scroll(root); }
+  }
+}

@@ -1,0 +1,78 @@
+/**
+ * Costo de envío. Funciones puras: las usa el formulario (para mostrar el costo) y el servidor (que es quien lo cobra).
+ * El navegador NUNCA manda un costo: solo manda método, provincia y código postal, y el servidor lo recalcula.
+ */
+
+export type DeliveryMethod = "delivery" | "pickup";
+
+/** Envío gratis cuando el subtotal de los productos supera este monto (en pesos). */
+export const FREE_SHIPPING_OVER = 100_000;
+
+/** Dónde se retira el pedido (gratis, para cualquier comprador). */
+export const PICKUP_POINT = "[PUNTO DE RETIRO EN CÓRDOBA]";
+
+/** Códigos postales de la ciudad de Córdoba (capital). ⚠ Verificalos con el correo antes de lanzar: de esto depende qué envíos son gratis. */
+export const CORDOBA_CAPITAL_ZIPS = { from: 5000, to: 5016 };
+
+export type Zone = "capital" | "cordoba" | "centro" | "interior" | "patagonia";
+
+export const ZONE_LABEL: Record<Zone, string> = {
+  capital: "Córdoba capital",
+  cordoba: "Resto de la provincia de Córdoba",
+  centro: "Centro (CABA, Buenos Aires, Santa Fe, Entre Ríos, La Pampa)",
+  interior: "Cuyo y Norte",
+  patagonia: "Patagonia",
+};
+
+/**
+ * Tarifas por zona, en pesos. `null` = [A DEFINIR]: todavía no se vende con envío a esa zona
+ * (salvo que la compra supere el monto de envío gratis o se elija retiro). Editá solo esta tabla.
+ */
+export const RATES: Record<Zone, number | null> = {
+  capital: 0, // envío gratis SOLO en Córdoba capital
+  cordoba: null,
+  centro: null,
+  interior: null,
+  patagonia: null,
+};
+
+const ZONE_OF: Record<string, Zone> = {
+  "Córdoba": "cordoba",
+  "Ciudad Autónoma de Buenos Aires": "centro", "Buenos Aires": "centro", "Santa Fe": "centro", "Entre Ríos": "centro", "La Pampa": "centro",
+  "Catamarca": "interior", "Chaco": "interior", "Corrientes": "interior", "Formosa": "interior", "Jujuy": "interior", "La Rioja": "interior",
+  "Mendoza": "interior", "Misiones": "interior", "Salta": "interior", "San Juan": "interior", "San Luis": "interior",
+  "Santiago del Estero": "interior", "Tucumán": "interior",
+  "Chubut": "patagonia", "Neuquén": "patagonia", "Río Negro": "patagonia", "Santa Cruz": "patagonia", "Tierra del Fuego": "patagonia",
+};
+
+/** Parte numérica del código postal ("5000" o "X5000ABC" → 5000), o null si no es válido. */
+const zipNumber = (zip: string): number | null => {
+  const m = /^[A-Za-z]?(\d{4})(?:[A-Za-z]{3})?$/.exec(zip.trim());
+  return m ? Number(m[1]) : null;
+};
+
+/** Zona de destino. Dentro de Córdoba la zona sale del código postal (la localidad es texto libre y no es confiable). */
+export function zoneOf(province: string, zip = ""): Zone | null {
+  const zone = ZONE_OF[province];
+  if (!zone) return null;
+  if (zone !== "cordoba") return zone;
+  const n = zipNumber(zip);
+  return n !== null && n >= CORDOBA_CAPITAL_ZIPS.from && n <= CORDOBA_CAPITAL_ZIPS.to ? "capital" : "cordoba";
+}
+
+export type ShippingQuote =
+  | { ok: true; cost: number; free: "pickup" | "threshold" | "zone" | null }
+  | { ok: false; reason: "no_province" | "no_zip" | "no_rate" };
+
+/** `subtotal` = suma de los productos, sin envío. `rates` solo se cambia en las pruebas. */
+export function quoteShipping(method: DeliveryMethod, province: string, zip: string, subtotal: number, rates: Record<Zone, number | null> = RATES): ShippingQuote {
+  if (method === "pickup") return { ok: true, cost: 0, free: "pickup" };
+  if (subtotal > FREE_SHIPPING_OVER) return { ok: true, cost: 0, free: "threshold" };
+  const zone = zoneOf(province, zip);
+  if (!zone) return { ok: false, reason: "no_province" };
+  // En Córdoba, sin un código postal válido no se puede saber si es la capital.
+  if (ZONE_OF[province] === "cordoba" && zipNumber(zip) === null) return { ok: false, reason: "no_zip" };
+  const rate = rates[zone];
+  if (rate === null || !Number.isFinite(rate) || rate < 0) return { ok: false, reason: "no_rate" };
+  return { ok: true, cost: rate, free: rate === 0 ? "zone" : null };
+}
