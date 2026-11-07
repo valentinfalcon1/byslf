@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PROVINCES } from "@/lib/shipping";
-import { CORDOBA_CAPITAL_ZIPS, FREE_SHIPPING_OVER, RATES, quoteShipping, zoneOf, type Zone } from "@/lib/shippingCost";
+import { BRANCH_RATES, CORDOBA_CAPITAL_ZIPS, FREE_SHIPPING_OVER, RATES, quoteShipping, zoneOf, type Zone } from "@/lib/shippingCost";
 
 const PAID: Record<Zone, number | null> = { capital: 0, cordoba: 3000, centro: 4500, interior: 6000, patagonia: 9000 };
 
@@ -83,5 +83,52 @@ describe("quoteShipping", () => {
     expect(RATES.capital).toBe(0);
     expect(RATES.cordoba).toBeNull();
     expect(RATES.centro).toBeNull();
+  });
+});
+
+describe("envío a sucursal", () => {
+  const BRANCH: Record<Zone, number | null> = { capital: 1500, cordoba: 2500, centro: 3500, interior: 4500, patagonia: 6500 };
+
+  it("usa su propia tabla, no la de domicilio", () => {
+    expect(quoteShipping("branch", "Salta", "", 5000, BRANCH)).toEqual({ ok: true, cost: 4500, free: null });
+    expect(quoteShipping("delivery", "Salta", "4400", 5000, PAID)).toEqual({ ok: true, cost: 6000, free: null });
+  });
+
+  it("no pide código postal: la zona sale de la provincia", () => {
+    expect(quoteShipping("branch", "Córdoba", "", 5000, BRANCH)).toEqual({ ok: true, cost: 2500, free: null });
+    expect(quoteShipping("delivery", "Córdoba", "", 5000, PAID)).toEqual({ ok: false, reason: "no_zip" });
+  });
+
+  it("sin provincia no se puede cotizar", () => {
+    expect(quoteShipping("branch", "", "", 5000, BRANCH)).toEqual({ ok: false, reason: "no_province" });
+  });
+
+  it("supera los $100.000: gratis aunque no haya tarifa", () => {
+    expect(quoteShipping("branch", "Salta", "", FREE_SHIPPING_OVER + 1, BRANCH_RATES)).toEqual({ ok: true, cost: 0, free: "threshold" });
+    expect(quoteShipping("branch", "Salta", "", FREE_SHIPPING_OVER, BRANCH_RATES)).toEqual({ ok: false, reason: "no_rate" });
+  });
+
+  it("con las tarifas todavía sin definir no se vende a sucursal (hasta que se carguen)", () => {
+    for (const zone of Object.keys(BRANCH_RATES) as Zone[]) expect(BRANCH_RATES[zone], zone).toBeNull();
+    expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: false, reason: "no_rate" });
+  });
+
+  it("la tarifa de domicilio por defecto no se mezcla con la de sucursal", () => {
+    expect(quoteShipping("delivery", "Córdoba", "5000", 5000)).toEqual({ ok: true, cost: RATES.capital, free: "zone" });
+  });
+});
+
+describe("tabla por defecto de sucursal", () => {
+  it("a sucursal se lee BRANCH_RATES y a domicilio RATES (cada una con su tarifa)", () => {
+    const antesB = BRANCH_RATES.centro, antesR = RATES.centro;
+    try {
+      BRANCH_RATES.centro = 3500;
+      RATES.centro = 5500;
+      expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: true, cost: 3500, free: null });
+      expect(quoteShipping("delivery", "Santa Fe", "2000", 5000)).toEqual({ ok: true, cost: 5500, free: null });
+    } finally {
+      BRANCH_RATES.centro = antesB;
+      RATES.centro = antesR;
+    }
   });
 });

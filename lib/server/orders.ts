@@ -1,9 +1,9 @@
 import "server-only";
 import type { Shipping } from "@/lib/shipping";
 import { getProduct } from "@/data/products";
-import { PICKUP_POINT } from "@/lib/shippingCost";
 import { db } from "./db";
 import { notifyOwner } from "./mail";
+import { shippingLines } from "./shippingText";
 import type { MpPayment } from "./mercadopago";
 import { hashKey } from "./security";
 
@@ -126,20 +126,7 @@ async function notifySale(payment: MpPayment, kind: "ok" | "review" | "duplicate
       "Productos:",
       ...(lines.length ? lines : ["  (no se encontró el pedido en la base)"]),
       "",
-      "Comprador:",
-      `  ${s.name ?? ""} ${s.lastname ?? ""}`.trimEnd(),
-      `  Email: ${s.email ?? "-"}`,
-      `  Teléfono: ${s.phone ?? "-"}`,
-      `  DNI: ${s.dni || "-"}`,
-      "",
-      ...(s.method === "pickup"
-        ? ["RETIRA EN CÓRDOBA (no hay que enviar):", `  ${PICKUP_POINT}`, `  Indicaciones: ${s.notes || "-"}`]
-        : [
-            "Enviar a:",
-            `  ${s.street ?? ""} ${s.number ?? ""}${s.floor ? `, ${s.floor}` : ""}`.trimEnd(),
-            `  ${s.city ?? ""}, ${s.province ?? ""} (CP ${s.zip ?? "-"})`,
-            `  Indicaciones: ${s.notes || "-"}`,
-          ]),
+      ...shippingLines(s),
       "",
       `Envío cobrado: $${payment.metadata?.shipping_cost ?? 0}`,
     ].join("\n");

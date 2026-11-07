@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BUSINESS, CONSUMER_DEFENSE_URL } from "@/lib/legal";
+import { CONSUMER_DEFENSE_URL } from "@/lib/legal";
 import { LAUNCHED, SOCIAL } from "@/lib/site";
 import { Button } from "./Button";
 import { InstagramIcon } from "./icons";
@@ -22,7 +22,7 @@ const COLUMNS = [
     links: [
       { label: "Guía de talles", href: "#" },
       { label: "Envíos y cambios", href: "/legal/cambios-y-devoluciones" },
-      { label: "Contacto", href: "#" },
+      { label: "Contacto", href: SOCIAL.instagram.url, external: true },
     ],
   },
   {
@@ -32,6 +32,7 @@ const COLUMNS = [
       { label: "Política de privacidad", href: "/legal/privacidad" },
       { label: "Política de cookies", href: "/legal/cookies" },
       { label: "Cambios y devoluciones", href: "/legal/cambios-y-devoluciones" },
+      { label: "Defensa del Consumidor", href: CONSUMER_DEFENSE_URL, external: true },
     ],
   },
   {
@@ -87,18 +88,7 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="container-x mt-16 border-t border-line pt-6 text-center">
-        <p className="label text-[11px] text-star">
-          {BUSINESS.legalName} · CUIT {BUSINESS.cuit} · {BUSINESS.address} · {BUSINESS.email}
-        </p>
-        <p className="label mt-2 text-[11px] text-star">
-          <a href={CONSUMER_DEFENSE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-paper">
-            Defensa del Consumidor — reclamos
-          </a>
-        </p>
-      </div>
-
-      <div className="container-x flex flex-col items-center justify-between gap-3 py-6 sm:flex-row">
+      <div className="container-x mt-16 flex flex-col items-center justify-between gap-3 border-t border-line py-6 sm:flex-row">
         <p className="label text-star">© BYSLF®</p>
         <Stars className="text-star" />
         <p className="label text-star">EST. 2026 — Córdoba / ARG</p>

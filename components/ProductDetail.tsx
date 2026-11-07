@@ -4,6 +4,7 @@ import Image from "next/image";
 import { forwardRef, useRef, useState } from "react";
 import type { Product } from "@/data/products";
 import { formatPrice } from "@/lib/format";
+import { POLICY } from "@/lib/legal";
 import { sizeChartFor, type SizeChart } from "@/data/sizeCharts";
 import { Button } from "./Button";
 import { useCart } from "./cart/CartProvider";
@@ -14,7 +15,7 @@ import { Tag } from "./Tag";
 const ACCORDIONS = [
   { title: "Descripción", body: "[DESCRIPCIÓN DEL PRODUCTO]" },
   { title: "Materiales y cuidado", body: "[MATERIALES Y INSTRUCCIONES DE LAVADO]" },
-  { title: "Envíos y cambios", body: "Hacemos envíos a toda Argentina. [PLAZOS DE ENTREGA Y POLÍTICA DE CAMBIOS]" },
+  { title: "Envíos y cambios", body: `Envíos a toda Argentina a través de Correo Argentino. Despachamos en ${POLICY.dispatchDays} días hábiles y la entrega demora ${POLICY.deliveryDays} días hábiles según el destino. Cambios de talle o color dentro de los ${POLICY.exchangeDays} días.` },
 ];
 
 export function ProductDetail({ product }: { product: Product }) {

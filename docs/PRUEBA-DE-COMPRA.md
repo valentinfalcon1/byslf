@@ -61,7 +61,7 @@ Tiene que terminar con **"✓ Todo listo para probar"** y llegarte un mail de pr
 
 1. Abrí una **ventana de incógnito** del navegador (lo recomienda Mercado Pago para evitar errores de sesión) y arrancá el sitio en otra terminal con `npm run dev`. Entrá a **http://localhost:3000/producto/producto-01**.
 2. Elegí el talle **M** → **Agregar al carrito** → **Finalizar compra**.
-3. Completá el formulario de envío con datos inventados pero con **formato válido** (teléfono con característica, CP de 4 números, elegí una provincia) y tildá los términos → **Ir a pagar**.
+3. Completá el formulario de envío con datos inventados pero con **formato válido** (código de área sin 0 y celular sin 15, CP de 4 números, elegí una provincia) y tildá los términos → **Ir a pagar**.
 4. Te lleva a Mercado Pago. **Ingresá con el comprador de prueba** (paso 1.B.3) y pagá con:
 
    | Dato | Valor |
@@ -95,7 +95,7 @@ node --env-file=.env.local scripts/simulate-webhook.mjs 123456789
 
 | Dónde mirar | Qué tenés que ver |
 |---|---|
-| **Tu mail** (revisá Spam) | Asunto **"Nueva venta BYSLF · $1000"**, con: productos, talle, cantidad, nombre, email, teléfono, DNI, dirección completa e indicaciones, y el número de pago. **Un solo mail**. |
+| **Tu mail** (revisá Spam) | Asunto **"Nueva venta BYSLF · $1000"**, con: productos, talle, cantidad, nombre, email, código de área y celular, DNI, dirección completa (o la sucursal de Correo Argentino) e indicaciones, y el número de pago. **Un solo mail**. |
 | **Supabase → Table Editor → `orders`** | Una fila con `status = paid`, `mp_payment_id` con el número del pago, y `terms_accepted_at` con la fecha. **No hay datos de envío en la base**: nombre, dirección, etc. te llegan solo en el mail de venta. |
 | **Supabase → `stock`** | `producto-01 / Negro / M` pasó de **3 a 2**. |
 | **Terminal del sitio** | Sin errores en rojo. |

@@ -81,7 +81,7 @@ afterEach(() => vi.unstubAllGlobals());
 let ipCounter = 0;
 const nextIp = () => `10.0.${Math.floor(++ipCounter / 250)}.${ipCounter % 250}`;
 const SHIPPING = {
-  name: "Ana", lastname: "Pérez", email: "ana@mail.com", phone: "351 555 1234", dni: "30123456",
+  name: "Ana", lastname: "Pérez", email: "ana@mail.com", areaCode: "351", phone: "5551234", dni: "30123456",
   street: "Colón", number: "100", floor: "3B", city: "Córdoba", province: "Córdoba", zip: "5000", notes: "Timbre roto, golpear",
 };
 
@@ -130,7 +130,7 @@ describe("compra completa", () => {
     expect(order.status).toBe("pending");
     expect(order.terms_accepted_at).toBeTruthy(); // quedó registrada la aceptación de términos
     // NINGÚN dato personal quedó en la base: ni en columnas ni en ningún valor de la fila
-    expect(JSON.stringify(order)).not.toMatch(/Ana|Pérez|ana@mail|Colón|30123456|351 555|5000|Timbre/);
+    expect(JSON.stringify(order)).not.toMatch(/Ana|Pérez|ana@mail|Colón|30123456|5551234|5000|Timbre/);
     expect(order.buyer_key).toMatch(/^[0-9a-f]{32}$/); // solo un hash del email
     expect(Number(order.amount)).toBe(2000);
 
@@ -158,7 +158,7 @@ describe("compra completa", () => {
     const [mail] = mails();
     expect(mail.to).toEqual(["duena@mail.com"]);
     expect(mail.subject).toContain("Nueva venta");
-    for (const dato of ["Ana Pérez", "ana@mail.com", "351 555 1234", "30123456", "Colón 100, 3B", "Córdoba, Córdoba", "CP 5000", "Timbre roto", "Byslf patch negra", "Negro", "Talle M", "x2", "555", order.id]) {
+    for (const dato of ["Ana Pérez", "ana@mail.com", "Cód. área (sin 0): 351", "Celular: 5551234", "30123456", "Colón 100, 3B", "Provincia: Córdoba", "Localidad: Córdoba", "CP (CPA): 5000", "Timbre roto", "Byslf patch negra", "Negro", "Talle M", "x2", "555", order.id]) {
       expect(mail.text, `el mail debería incluir "${dato}"`).toContain(dato);
     }
     expect(mail).not.toHaveProperty("html"); // solo texto plano
@@ -258,7 +258,36 @@ describe("stock", () => {
       approve(1, order.id);
       await notify(1);
       expect(mails()[0].text).toContain("RETIRA EN CÓRDOBA");
-      expect(mails()[0].text).not.toContain("Enviar a:");
+      expect(mails()[0].text).not.toContain("ENVÍO A DOMICILIO");
+    });
+
+    const BRANCH = { method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", street: "", number: "", floor: "", city: "", zip: "" };
+
+    it("a sucursal sin tarifa cargada no se vende (y no se reserva stock)", async () => {
+      const res = await buy({ shipping: BRANCH });
+      expect(res.status).toBe(422);
+      expect(await stockOf()).toBe(3);
+      expect(await orders()).toHaveLength(0);
+    });
+
+    it("a sucursal sin sucursal elegida se rechaza antes de reservar", async () => {
+      const res = await buy({ shipping: { ...BRANCH, branch: "" } });
+      expect(res.status).toBe(422);
+      expect(await orders()).toHaveLength(0);
+    });
+
+    it("a sucursal, sobre $100.000: se vende gratis y el mail trae la sucursal, la provincia y el celular", async () => {
+      await pg.exec("update stock set qty = 500 where size = 'L'");
+      const res = await buy({ items: lines(11), shipping: BRANCH });
+      expect(res.status).toBe(200);
+      const [order] = await orders();
+      approve(1, order.id);
+      await notify(1);
+      const text = mails()[0].text;
+      for (const dato of ["ENVÍO A SUCURSAL DE CORREO ARGENTINO", "Provincia: Santa Fe", "Sucursal de destino: Sucursal Rosario Centro", "Cód. área (sin 0): 351", "Celular: 5551234", "Ana Pérez"]) {
+        expect(text, dato).toContain(dato);
+      }
+      expect(text).not.toContain("ENVÍO A DOMICILIO");
     });
 
     it("supera los $100.000: envío gratis aunque la zona no tenga tarifa", async () => {
@@ -587,7 +616,7 @@ describe("pago por transferencia", () => {
 
   it("tampoco guarda datos personales en la base", async () => {
     await reserveT();
-    expect(JSON.stringify(await orders())).not.toMatch(/Ana|Pérez|ana@mail|Colón|30123456|351 555|Timbre/);
+    expect(JSON.stringify(await orders())).not.toMatch(/Ana|Pérez|ana@mail|Colón|30123456|5551234|Timbre/);
   });
 
   it("una forma de pago inventada se rechaza sin reservar nada", async () => {
@@ -611,7 +640,7 @@ describe("pago por transferencia", () => {
     const [mail] = mails();
     expect(mail.to).toEqual(["duena@mail.com"]);
     expect(mail.subject).toContain("Transferencia por confirmar");
-    for (const dato of ["SIN CONFIRMAR", t.code, t.orderId, "Ana Pérez", "ana@mail.com", "351 555 1234", "Colón 100, 3B", "Córdoba, Córdoba", "CP 5000", "Timbre roto", "Negro", "Talle M", "/admin/confirmar?o="]) {
+    for (const dato of ["SIN CONFIRMAR", t.code, t.orderId, "Ana Pérez", "ana@mail.com", "Cód. área (sin 0): 351", "Celular: 5551234", "Colón 100, 3B", "Provincia: Córdoba", "Localidad: Córdoba", "CP (CPA): 5000", "Timbre roto", "Negro", "Talle M", "/admin/confirmar?o="]) {
       expect(mail.text, `el mail debería incluir "${dato}"`).toContain(dato);
     }
     expect(mail).not.toHaveProperty("html");

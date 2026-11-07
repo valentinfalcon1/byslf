@@ -3,7 +3,8 @@
  * El navegador NUNCA manda un costo: solo manda método, provincia y código postal, y el servidor lo recalcula.
  */
 
-export type DeliveryMethod = "delivery" | "pickup";
+/** delivery = a domicilio · branch = retiro en una sucursal de Correo Argentino · pickup = retiro en Córdoba (punto propio). */
+export type DeliveryMethod = "delivery" | "branch" | "pickup";
 
 /** Envío gratis cuando el subtotal de los productos supera este monto (en pesos). */
 export const FREE_SHIPPING_OVER = 100_000;
@@ -30,6 +31,18 @@ export const ZONE_LABEL: Record<Zone, string> = {
  */
 export const RATES: Record<Zone, number | null> = {
   capital: 0, // envío gratis SOLO en Córdoba capital
+  cordoba: null,
+  centro: null,
+  interior: null,
+  patagonia: null,
+};
+
+/**
+ * Tarifas de envío A SUCURSAL de Correo Argentino, por zona (suele ser más barato que a domicilio). `null` = [A DEFINIR].
+ * Acá no hay "capital gratis": a sucursal solo es gratis si la compra supera FREE_SHIPPING_OVER o si cargás 0 en la zona.
+ */
+export const BRANCH_RATES: Record<Zone, number | null> = {
+  capital: null,
   cordoba: null,
   centro: null,
   interior: null,
@@ -65,14 +78,16 @@ export type ShippingQuote =
   | { ok: false; reason: "no_province" | "no_zip" | "no_rate" };
 
 /** `subtotal` = suma de los productos, sin envío. `rates` solo se cambia en las pruebas. */
-export function quoteShipping(method: DeliveryMethod, province: string, zip: string, subtotal: number, rates: Record<Zone, number | null> = RATES): ShippingQuote {
+export function quoteShipping(method: DeliveryMethod, province: string, zip: string, subtotal: number, rates?: Record<Zone, number | null>): ShippingQuote {
   if (method === "pickup") return { ok: true, cost: 0, free: "pickup" };
   if (subtotal > FREE_SHIPPING_OVER) return { ok: true, cost: 0, free: "threshold" };
-  const zone = zoneOf(province, zip);
+  const branch = method === "branch";
+  // A sucursal no se pide código postal: la zona sale de la provincia (en Córdoba, "resto de la provincia").
+  const zone = zoneOf(province, branch ? "" : zip);
   if (!zone) return { ok: false, reason: "no_province" };
-  // En Córdoba, sin un código postal válido no se puede saber si es la capital.
-  if (ZONE_OF[province] === "cordoba" && zipNumber(zip) === null) return { ok: false, reason: "no_zip" };
-  const rate = rates[zone];
+  // A domicilio en Córdoba, sin un código postal válido no se puede saber si es la capital.
+  if (!branch && ZONE_OF[province] === "cordoba" && zipNumber(zip) === null) return { ok: false, reason: "no_zip" };
+  const rate = (rates ?? (branch ? BRANCH_RATES : RATES))[zone];
   if (rate === null || !Number.isFinite(rate) || rate < 0) return { ok: false, reason: "no_rate" };
   return { ok: true, cost: rate, free: rate === 0 ? "zone" : null };
 }

@@ -41,6 +41,8 @@ export function CheckoutForm() {
   const [termsError, setTermsError] = useState(false);
 
   const pickup = form.method === "pickup";
+  const branch = form.method === "branch";
+  const home = form.method === "delivery";
   // Solo para mostrar: el servidor vuelve a calcular el envío al cobrar.
   const quote = subtotal === null ? null : quoteShipping(form.method, form.province, form.zip, subtotal);
   const shippingLabel = !quote ? "[A DEFINIR]" : !quote.ok ? (quote.reason === "no_province" ? "Elegí tu provincia" : quote.reason === "no_zip" ? "Ingresá tu código postal" : "[A DEFINIR]") : quote.cost === 0 ? "Gratis" : formatPrice(quote.cost);
@@ -49,7 +51,7 @@ export function CheckoutForm() {
 
   const setMethod = (m: DeliveryMethod) => {
     setForm((f) => ({ ...f, method: m }));
-    setErrors((x) => ({ ...x, street: undefined, number: undefined, city: undefined, province: undefined, zip: undefined }));
+    setErrors((x) => ({ ...x, street: undefined, number: undefined, city: undefined, province: undefined, zip: undefined, branch: undefined }));
   };
 
   const set = (k: keyof Shipping) => (e: { target: { value: string } }) => {
@@ -138,16 +140,18 @@ export function CheckoutForm() {
             <Field id="lastname" label="Apellido" error={errors.lastname}><input {...props("lastname", "family-name")} className={input} /></Field>
           </div>
           <Field id="email" label="Email" error={errors.email}><input {...props("email", "email")} type="email" inputMode="email" className={input} /></Field>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field id="phone" label="Teléfono" error={errors.phone}><input {...props("phone", "tel")} type="tel" inputMode="tel" placeholder="351 000 0000" className={input} /></Field>
-            <Field id="dni" label="DNI" optional error={errors.dni}><input {...props("dni")} inputMode="numeric" className={input} /></Field>
+          <div className="grid gap-5 sm:grid-cols-[9rem_1fr]">
+            <Field id="areaCode" label="Cód. de área (sin 0)" error={errors.areaCode}><input {...props("areaCode", "tel-area-code")} inputMode="numeric" placeholder="351" className={input} /></Field>
+            <Field id="phone" label="Celular (sin 15)" error={errors.phone}><input {...props("phone", "tel-local")} type="tel" inputMode="tel" placeholder="5551234" className={input} /></Field>
           </div>
+          <Field id="dni" label="DNI" optional error={errors.dni}><input {...props("dni")} inputMode="numeric" className={input} /></Field>
         </fieldset>
 
         <fieldset className="space-y-3">
           <legend className="display mb-5 text-3xl">Cómo lo recibís</legend>
           {([
             ["delivery", "Envío a domicilio", `Gratis en Córdoba capital y en compras de más de ${formatPrice(FREE_SHIPPING_OVER)}.`],
+            ["branch", "Envío a sucursal de Correo Argentino", `Lo retirás en la sucursal que elijas. Gratis en compras de más de ${formatPrice(FREE_SHIPPING_OVER)}.`],
             ["pickup", "Retiro en Córdoba", "Gratis."],
           ] as const).map(([value, title, hint]) => (
             <label key={value} className={`flex cursor-pointer items-start gap-3 rounded-btn border bg-surface p-4 ${form.method === value ? "border-paper" : "border-line"}`}>
@@ -160,11 +164,33 @@ export function CheckoutForm() {
           ))}
         </fieldset>
 
-        {pickup ? (
+        {pickup && (
           <p className="label rounded-btn border border-line bg-surface p-4 text-star">
             Retirás en: <span className="font-bold text-paper">{PICKUP_POINT}</span>. Te avisamos por mail cuando esté listo.
           </p>
-        ) : (
+        )}
+        {branch && (
+          <fieldset className="space-y-5">
+            <legend className="display mb-5 text-3xl">Sucursal de Correo Argentino</legend>
+            <Field id="province" label="Provincia" error={errors.province}>
+              <div className="relative">
+                <select {...props("province", "address-level1")} className={`${input} appearance-none pr-11`}>
+                  <option value="">Elegí una provincia</option>
+                  {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <ChevronDownIcon className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-star" />
+              </div>
+            </Field>
+            <Field id="branch" label="Sucursal de destino" error={errors.branch}>
+              <input {...props("branch")} placeholder="Ej. Sucursal Rosario Centro, Córdoba 721" className={input} />
+              <p className="label mt-2 text-[11px] text-star">Escribí el nombre o la dirección de la sucursal de Correo Argentino donde querés retirarlo.</p>
+            </Field>
+            <Field id="notes" label="Observaciones" optional error={errors.notes}>
+              <textarea {...props("notes")} rows={3} className={`${input} h-auto py-4`} />
+            </Field>
+          </fieldset>
+        )}
+        {home && (
         <fieldset className="space-y-5">
           <legend className="display mb-5 text-3xl">Dirección de envío</legend>
           <div className="grid gap-5 sm:grid-cols-[1fr_8rem]">

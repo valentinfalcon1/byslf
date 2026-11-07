@@ -18,3 +18,18 @@ export const BUSINESS = {
 
 /** Reclamos del consumidor (verificar el link vigente al publicar). */
 export const CONSUMER_DEFENSE_URL = "https://www.argentina.gob.ar/produccion/defensadelconsumidor";
+
+/**
+ * Plazos y condiciones de la política comercial. Un solo lugar: los leen "Cambios y devoluciones" y el desplegable del producto.
+ * ⚠ Son los valores propuestos al armar el sitio: confirmá que los vas a cumplir antes de abrir la tienda.
+ */
+export const POLICY = {
+  /** Días corridos, desde que el cliente recibe el pedido, para pedir un cambio de talle o color. */
+  exchangeDays: 30,
+  /** Días hábiles para devolver el dinero, desde que recibimos el producto devuelto. */
+  refundBusinessDays: 10,
+  /** Tiempo que tardamos en despachar, desde que se acredita el pago (días hábiles). */
+  dispatchDays: "2 a 5",
+  /** Tiempo estimado de entrega de Correo Argentino, según el destino (días hábiles). */
+  deliveryDays: "3 a 10",
+} as const;

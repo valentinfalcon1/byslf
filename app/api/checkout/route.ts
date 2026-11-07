@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   // El costo de envío lo calcula SIEMPRE el servidor (método + provincia + subtotal); el navegador no manda ningún monto.
   const quote = quoteShipping(shipping.method, shipping.province, shipping.zip, subtotal);
   if (!quote.ok) {
-    return json({ error: "Todavía no hacemos envíos a domicilio a tu zona. Podés elegir retiro en Córdoba o escribirnos.", fields: { [quote.reason === "no_zip" ? "zip" : "province"]: "Sin envío a esta zona por ahora." } }, 422);
+    return json({ error: "Todavía no hacemos envíos a tu zona. Podés elegir retiro en Córdoba o escribirnos.", fields: { [quote.reason === "no_zip" ? "zip" : "province"]: "Sin envío a esta zona por ahora." } }, 422);
   }
   if (quote.cost > 0) items.push({ id: "envio", title: "Envío", quantity: 1, unit_price: quote.cost, currency_id: "ARS" });
   const amount = subtotal + quote.cost;

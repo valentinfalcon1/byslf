@@ -53,8 +53,8 @@ Revisión del código de la tienda (Next.js + Supabase + Mercado Pago + Resend),
 ## Cómo se prueba
 
 ```
-npm test              # 317 pruebas: lógica, base de datos, API, carrito, formulario, newsletter, seguridad
-npm run test:e2e      # 70 pruebas en Chrome real: recorre el sitio como un cliente (requiere Chrome)
+npm test              # 348 pruebas: lógica, base de datos, API, carrito, formulario, newsletter, seguridad
+npm run test:e2e      # 72 pruebas en Chrome real: recorre el sitio como un cliente (requiere Chrome)
 npx tsc --noEmit      # tipos
 ```
 

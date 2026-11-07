@@ -1,10 +1,10 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getProduct } from "@/data/products";
-import { PICKUP_POINT } from "@/lib/shippingCost";
 import type { Shipping } from "@/lib/shipping";
 import { orderCode } from "@/lib/transfer";
 import { notifyOwner } from "./mail";
+import { shippingLines } from "./shippingText";
 import type { OrderLine } from "./orders";
 import { siteUrl } from "./security";
 
@@ -51,20 +51,7 @@ export async function notifyTransfer(order: { id: string; amount: number | strin
       "Productos:",
       ...lines,
       "",
-      "Comprador:",
-      `  ${s.name} ${s.lastname}`.trimEnd(),
-      `  Email: ${s.email}`,
-      `  Teléfono: ${s.phone}`,
-      `  DNI: ${s.dni || "-"}`,
-      "",
-      ...(s.method === "pickup"
-        ? ["RETIRA EN CÓRDOBA (no hay que enviar):", `  ${PICKUP_POINT}`, `  Indicaciones: ${s.notes || "-"}`]
-        : [
-            "Enviar a:",
-            `  ${s.street} ${s.number}${s.floor ? `, ${s.floor}` : ""}`.trimEnd(),
-            `  ${s.city}, ${s.province} (CP ${s.zip})`,
-            `  Indicaciones: ${s.notes || "-"}`,
-          ]),
+      ...shippingLines(s),
       "",
       link
         ? `Cuando veas el comprobante y la plata en tu cuenta, confirmá el pago acá (no reenvíes este mail: quien tenga el link puede confirmar):\n${link}`

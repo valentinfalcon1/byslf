@@ -13,7 +13,7 @@ const CART = [
 ];
 
 const VALID: Record<string, string> = {
-  name: "Ana", lastname: "Pérez", email: "ana@mail.com", phone: "351 555 1234", dni: "30123456",
+  name: "Ana", lastname: "Pérez", email: "ana@mail.com", areaCode: "351", phone: "5551234", dni: "30123456",
   street: "Colón", number: "100", floor: "3B", city: "Córdoba", province: "Córdoba", zip: "5000", notes: "Timbre roto",
 };
 
@@ -76,7 +76,7 @@ describe("validación antes de enviar", () => {
     renderForm();
     acceptTerms();
     submit();
-    for (const id of ["name", "lastname", "email", "phone", "street", "number", "city", "province", "zip"]) {
+    for (const id of ["name", "lastname", "email", "areaCode", "phone", "street", "number", "city", "province", "zip"]) {
       expect(field(id).getAttribute("aria-invalid"), id).toBe("true");
       expect(document.getElementById(`${id}-error`), id).not.toBeNull();
     }
@@ -95,7 +95,8 @@ describe("validación antes de enviar", () => {
 
   it.each([
     ["email", "mal", /email/i],
-    ["phone", "12", /teléfono/i],
+    ["phone", "12", /celular/i],
+    ["areaCode", "0351", /área/i],
     ["zip", "ABC", /postal/i],
   ])("rechaza %s inválido", (id, value, msg) => {
     renderForm();
@@ -265,7 +266,7 @@ describe("costo y método de entrega", () => {
     fetchMock.mockResolvedValue(Response.json({ url: "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=1" }));
     renderForm();
     fireEvent.click(screen.getByLabelText(/Retiro en Córdoba/i));
-    fill({ name: "Ana", lastname: "Pérez", email: "ana@mail.com", phone: "351 555 1234" });
+    fill({ name: "Ana", lastname: "Pérez", email: "ana@mail.com", areaCode: "351", phone: "5551234" });
     acceptTerms();
     submit();
     await waitFor(() => expect(goTo).toHaveBeenCalled());
@@ -361,5 +362,55 @@ describe("pago por transferencia", () => {
     fireEvent.click(screen.getByRole("button", { name: /reservar y ver datos/i }));
     await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/Sin stock/));
     expect(screen.queryByText(/Pagá por transferencia/i)).toBeNull();
+  });
+});
+
+describe("envío a sucursal de Correo Argentino", () => {
+  const BRANCH = { name: "Ana", lastname: "Pérez", email: "ana@mail.com", areaCode: "351", phone: "5551234", province: "Santa Fe", branch: "Sucursal Rosario Centro" };
+  const chooseBranch = () => fireEvent.click(screen.getByLabelText(/Envío a sucursal/i));
+
+  it("muestra provincia y sucursal de destino, y oculta la dirección", () => {
+    renderForm();
+    chooseBranch();
+    expect(document.getElementById("branch")).not.toBeNull();
+    expect(document.getElementById("province")).not.toBeNull();
+    expect(document.getElementById("street")).toBeNull();
+    expect(document.getElementById("zip")).toBeNull();
+  });
+
+  it("vacío: marca provincia y sucursal como obligatorias", () => {
+    renderForm();
+    chooseBranch();
+    acceptTerms();
+    submit();
+    for (const id of ["province", "branch"]) expect(field(id).getAttribute("aria-invalid"), id).toBe("true");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("se manda method: branch con la sucursal elegida", async () => {
+    fetchMock.mockResolvedValue(Response.json({ url: "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=1" }));
+    renderForm();
+    chooseBranch();
+    fill(BRANCH);
+    acceptTerms();
+    submit();
+    await waitFor(() => expect(goTo).toHaveBeenCalled());
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.shipping).toMatchObject({ method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", areaCode: "351", phone: "5551234" });
+  });
+
+  it("sin tarifa para esa provincia avisa que no se envía todavía", () => {
+    renderForm();
+    chooseBranch();
+    fill({ province: "Santa Fe" });
+    expect(screen.getByText(/Todavía no enviamos a tu zona/i)).toBeTruthy();
+  });
+
+  it("volver a domicilio vuelve a pedir la dirección", () => {
+    renderForm();
+    chooseBranch();
+    fireEvent.click(screen.getByLabelText(/Envío a domicilio/i));
+    expect(document.getElementById("street")).not.toBeNull();
+    expect(document.getElementById("branch")).toBeNull();
   });
 });

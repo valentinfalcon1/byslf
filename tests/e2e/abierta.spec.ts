@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const SHIPPING = {
-  name: "Ana", lastname: "Pérez", email: "ana@mail.com", phone: "351 555 1234", dni: "30123456",
+  name: "Ana", lastname: "Pérez", email: "ana@mail.com", areaCode: "351", phone: "5551234", dni: "30123456",
   street: "Colón", number: "100", floor: "3B", city: "Córdoba", zip: "5000", notes: "Timbre roto",
 };
 
@@ -182,6 +182,25 @@ test.describe("datos de envío y pago", () => {
     expect(res2?.status()).toBe(404);
   });
 
+  test("envío a sucursal: pide provincia y sucursal (no la dirección) y las manda al servidor", async ({ page }) => {
+    await addProduct(page);
+    await page.goto("/checkout");
+    await page.getByLabel(/Envío a sucursal/).check();
+    await expect(page.locator("#street")).toHaveCount(0);
+    await expect(page.locator("#branch")).toBeVisible();
+    let body: any = null;
+    await page.route("**/api/checkout", async (route) => {
+      body = route.request().postDataJSON();
+      await route.fulfill({ status: 422, json: { error: "x" } });
+    });
+    for (const [id, value] of Object.entries({ name: "Ana", lastname: "Pérez", email: "ana@mail.com", areaCode: "351", phone: "5551234", branch: "Sucursal Rosario Centro" })) await page.locator("#" + id).fill(value);
+    await page.locator("#province").selectOption("Santa Fe");
+    await page.getByLabel(/Leí y acepto/).check();
+    await page.getByRole("button", { name: "Ir a pagar" }).click();
+    await expect.poll(() => body).not.toBeNull();
+    expect(body.shipping).toMatchObject({ method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", areaCode: "351", phone: "5551234" });
+  });
+
   test("con el carrito vacío /checkout no muestra el formulario", async ({ page }) => {
     await page.goto("/checkout");
     await expect(page.getByText("Tu carrito está vacío")).toBeVisible();
@@ -196,7 +215,7 @@ test.describe("datos de envío y pago", () => {
       await page.keyboard.press("Tab");
       await expect(page.locator(selector), `Tab debería llegar a ${selector}`).toBeFocused();
     };
-    for (const id of ["lastname", "email", "phone", "dni"]) await next(`#${id}`);
+    for (const id of ["lastname", "email", "areaCode", "phone", "dni"]) await next(`#${id}`);
     await next('input[name="method"]:checked'); // "Cómo lo recibís": las flechas cambian de opción
     for (const id of ["street", "number", "floor", "city", "zip", "province", "notes"]) await next(`#${id}`);
   });
