@@ -6,7 +6,7 @@ export const BUSINESS = {
   brand: "BYSLF",
   legalName: "[RAZÓN SOCIAL O NOMBRE Y APELLIDO DEL TITULAR]",
   cuit: "[CUIT]",
-  address: "[DOMICILIO LEGAL — Córdoba, Argentina]",
+  address: "Córdoba, Argentina", // ⚠ PROVISORIO: antes de empezar a vender, poner el domicilio comercial real (oficina, coworking, etc.)
   email: "[EMAIL DE CONTACTO]",
   phone: "[TELÉFONO / WHATSAPP]",
   /** Plazo que declarás para conservar datos de pedidos (ej. el que corresponda por obligaciones contables/fiscales). */
