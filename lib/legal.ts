@@ -4,8 +4,8 @@
  */
 export const BUSINESS = {
   brand: "BYSLF",
-  legalName: "[RAZÓN SOCIAL O NOMBRE Y APELLIDO DEL TITULAR]",
-  cuit: "[CUIT]",
+  legalName: "Valentin Falcon Pfister",
+  cuit: "20-45380475-6",
   address: "Córdoba, Argentina", // ⚠ PROVISORIO: antes de empezar a vender, poner el domicilio comercial real (oficina, coworking, etc.)
   email: "byslfco@gmail.com",
   phone: "[TELÉFONO / WHATSAPP]",
