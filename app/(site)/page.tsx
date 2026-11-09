@@ -12,15 +12,13 @@ import { Reveal } from "@/components/Reveal";
 import { Spotlight } from "@/components/Spotlight";
 import { TeaserGrid } from "@/components/TeaserGrid";
 import { getProducts } from "@/data/products";
-import { DROP_DATE, LAUNCHED, SOCIAL } from "@/lib/site";
+import { DROP_DATE, LAUNCHED } from "@/lib/site";
 
+// El lookbook se ve siempre, también con la tienda cerrada: muestra el estilo de la marca.
 const LOOK = [
-  { src: "hoodie", alt: "Buzo negro con el logo BYSLF en la espalda", span: "row-span-2" },
-  { src: "wall", alt: "Logo BYSLF negro sobre una pared de cemento", span: "" },
-  { src: "pants", alt: "Pantalón cargo negro con el monograma BY", span: "row-span-2" },
-  { src: "poster", alt: "Afiche de BYSLF pegado en la calle junto a fotos de skate", span: "" },
-  { src: "night", alt: "Buzo negro de noche con el logo en la espalda", span: "" },
-  { src: "stickers", alt: "Stickers del logo, el monograma BY y las tres estrellas", span: "" },
+  { src: "camiseta", alt: "Remera blanca con el logo BYSLF y las tres estrellas, colgada de una percha", box: "aspect-[3/4]" },
+  { src: "poster-subte", alt: "Afiche con el logo BYSLF repetido, en una estación de subte con bancos azules", box: "aspect-[10/7]" },
+  { src: "create-more", alt: "Las palabras CREATE MORE en letras negras, desenfocadas, sobre fondo claro", box: "aspect-[5/6]" },
 ];
 
 /** Retraso de la animación de entrada (CSS puro, funciona sin JavaScript). */
@@ -33,6 +31,9 @@ export default async function Home() {
     <>
       {/* Hero */}
       <Spotlight className="relative overflow-hidden">
+        {/* Foto de fondo: ya viene borrosa; se oscurece para que el logo y los textos se lean bien. */}
+        <Image src="/img/hero-bg.jpg" alt="" fill priority sizes="100vw" className="object-cover opacity-[0.16] grayscale" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink" aria-hidden="true" />
         <div className="hero-glow" aria-hidden="true" />
         <div className="container-x relative flex flex-col items-center pb-10 pt-14 text-center md:pt-20">
           <p className="rise label font-bold text-star" style={delay(0.05)}>
@@ -83,31 +84,20 @@ export default async function Home() {
         <Reveal>
           <h2 className="display mb-10 text-5xl md:text-7xl">Lookbook</h2>
         </Reveal>
-        <div className="grid grid-flow-dense auto-rows-[200px] grid-cols-2 gap-4 md:auto-rows-[260px] md:grid-cols-4 md:gap-6">
+        <div className="grid gap-4 md:grid-cols-[1fr_2fr_1fr] md:gap-6">
           {LOOK.map((l, i) => (
-            <Reveal key={l.src} className={l.span} delay={i * 80}>
-              <div className="group relative h-full overflow-hidden rounded-card border border-line">
-                {/* En modo teaser las fotos se ven tapadas: se intuye, no se ve. */}
+            <Reveal key={l.src} delay={i * 80}>
+              <div className={`group relative overflow-hidden rounded-card border border-line ${l.box} md:aspect-auto md:h-[400px]`}>
                 <Image
                   src={`/img/look/${l.src}.jpg`}
-                  alt={LAUNCHED ? l.alt : ""}
+                  alt={l.alt}
                   fill
-                  sizes="(min-width: 768px) 25vw, 50vw"
-                  className={
-                    LAUNCHED
-                      ? "object-cover transition-transform duration-700 group-hover:scale-105"
-                      : "scale-110 object-cover blur-xl brightness-50 grayscale transition-all duration-700 group-hover:scale-[1.18] group-hover:brightness-[0.65]"
-                  }
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
             </Reveal>
           ))}
-          <Reveal className="col-span-2 md:col-span-4" delay={LOOK.length * 80}>
-            <div className="flex flex-col items-center justify-center gap-3 rounded-card bg-paper p-6 text-center text-ink md:flex-row md:justify-between md:px-10 md:text-left">
-              <p className="display text-3xl md:text-5xl">Etiquetanos con #BYSLF</p>
-              <a href={SOCIAL.instagram.url} target="_blank" rel="noopener noreferrer" className="label font-bold underline underline-offset-4">@{SOCIAL.instagram.user}</a>
-            </div>
-          </Reveal>
         </div>
       </section>
 

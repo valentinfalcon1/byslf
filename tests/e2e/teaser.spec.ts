@@ -244,6 +244,19 @@ test.describe("animaciones e interacción de las cards", () => {
     await expect(card(page, 2).locator(".card3d")).toHaveClass(/is-flipped/);
   });
 
+  test("el lookbook se ve completo aunque la tienda esté cerrada (muestra el estilo de la marca)", async ({ page }) => {
+    await page.goto("/");
+    const imgs = page.locator("#lookbook img");
+    await expect(imgs).toHaveCount(3);
+    for (let i = 0; i < 3; i++) {
+      const img = imgs.nth(i);
+      await expect(img).toHaveAttribute("alt", /\S{3}/); // con descripción
+      expect(await img.evaluate((el) => getComputedStyle(el).filter)).toBe("none"); // sin blur ni oscurecido
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 200)).toBe(true);
+    }
+  });
+
   test("el efecto NO revela las fotos: siguen borrosas y oscuras con el mouse encima y con la card abierta", async ({ page }) => {
     await page.goto("/");
     await page.locator("#drop").scrollIntoViewIfNeeded();
