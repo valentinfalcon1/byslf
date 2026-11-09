@@ -778,3 +778,155 @@ describe("pago por transferencia", () => {
     expect((await orders())[0].status).toBe("expired");
   });
 });
+
+describe("mails al comprador", () => {
+  const post = (handler: Handler, path: string, body: unknown) =>
+    handler(
+      new Request(`https://tienda.test${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://tienda.test", "x-forwarded-for": nextIp() },
+        body: JSON.stringify(body),
+      }),
+    );
+  const toBuyer = () => mails().filter((m) => m.to[0] === "ana@mail.com");
+  const toOwner = () => mails().filter((m) => m.to[0] === "duena@mail.com");
+  const paid = async (over: Parameters<typeof buy>[0] = {}, amount = 2000) => {
+    const res = await buy({ items: [{ slug: "producto-01", color: "Negro", size: "M", qty: 2 }], ...over });
+    expect(res.status).toBe(200);
+    const [order] = await orders();
+    approve(1, order.id, amount);
+    await notify(1);
+    return order;
+  };
+
+  beforeEach(() => {
+    process.env.MAIL_FROM = "BYSLF <pedidos@byslf.com.ar>";
+  });
+
+  it("al confirmarse el pago con Mercado Pago el comprador recibe su confirmación, con el pedido, el envío y los plazos", async () => {
+    const order = await paid();
+    expect(toOwner()).toHaveLength(1);
+    expect(toBuyer()).toHaveLength(1);
+    const [mail] = toBuyer();
+    expect(mail.subject).toContain("Tu pedido BYSLF está confirmado");
+    expect(mail.subject).toContain(`BYSLF-${order.id.slice(0, 8).toUpperCase()}`);
+    for (const dato of ["Hola Ana!", "Byslf patch negra", "Negro", "Talle M", "x2", "Total pagado: $2.000", "Envío: gratis", "Envío a domicilio", "Colón 100, 3B", "Córdoba, Córdoba", "2 a 5 días hábiles", "3 a 10 días hábiles", "30 días", "@byslfco", "byslfco@gmail.com"]) {
+      expect(mail.text, `el mail debería incluir "${dato}"`).toContain(dato);
+    }
+    expect(mail).not.toHaveProperty("html");
+  });
+
+  it("el comprador no recibe el DNI ni datos de otros: solo lo que corresponde a su pedido", async () => {
+    await paid();
+    expect(toBuyer()[0].text).not.toContain("30123456");
+  });
+
+  it("sin MAIL_FROM (sin dominio) no se le intenta escribir al comprador, y la venta sigue igual", async () => {
+    delete process.env.MAIL_FROM;
+    await paid();
+    expect(toBuyer()).toHaveLength(0);
+    expect(toOwner()).toHaveLength(1);
+    expect((await orders())[0].status).toBe("paid");
+  });
+
+  it("si Mercado Pago avisa varias veces, el comprador recibe UN solo mail", async () => {
+    const order = await paid();
+    await notify(1);
+    await notify(1);
+    expect(toBuyer()).toHaveLength(1);
+    expect((await orders())[0].id).toBe(order.id);
+  });
+
+  it("un pedido que hay que revisar a mano (monto distinto) NO le manda nada al comprador todavía", async () => {
+    await paid({}, 1);
+    expect((await orders())[0].status).toBe("needs_review");
+    expect(toBuyer()).toHaveLength(0);
+    expect(toOwner()).toHaveLength(1);
+  });
+
+  it("un pago duplicado no le manda un segundo mail de confirmación", async () => {
+    const order = await paid();
+    approve(2, order.id, 2000);
+    await notify(2);
+    expect(toBuyer()).toHaveLength(1);
+    expect(toOwner()).toHaveLength(2); // la venta y la alerta de duplicado
+  });
+
+  it("con retiro en Córdoba el mail dice dónde retirar y no habla de plazos de correo", async () => {
+    await paid({ shipping: { method: "pickup", street: "", number: "", floor: "", city: "", zip: "", province: "" } });
+    const text = toBuyer()[0].text;
+    expect(text).toContain("Retiro en Córdoba");
+    expect(text).not.toContain("Plazos:");
+  });
+
+  it("a sucursal el mail dice la sucursal elegida", async () => {
+    await pg.exec("update stock set qty = 500 where size = 'L'");
+    const res = await buy({
+      items: Array.from({ length: 11 }, () => ({ slug: "producto-01", color: "Negro", size: "L", qty: 10 })),
+      shipping: { method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", street: "", number: "", floor: "", city: "", zip: "" },
+    });
+    expect(res.status).toBe(200);
+    const [order] = await orders();
+    approve(1, order.id, 110000);
+    await notify(1);
+    expect(toBuyer()[0].text).toContain("Envío a sucursal de Correo Argentino");
+    expect(toBuyer()[0].text).toContain("Sucursal Rosario Centro (Santa Fe)");
+  });
+
+  it("un mail caído NO rompe la venta aunque falle el del comprador", async () => {
+    failMail = true;
+    await paid();
+    expect((await orders())[0].status).toBe("paid");
+  });
+
+  it("transferencia: al tocar 'Ya transferí' el comprador recibe la constancia con el código y los datos para pagar", async () => {
+    const res = await buy({ payment: "transfer", items: [{ slug: "producto-01", color: "Negro", size: "M", qty: 2 }] });
+    const t = (await res.json()).transfer as { orderId: string; code: string };
+    const ok = await post(transferNotify, "/api/checkout/transfer/notify", { orderId: t.orderId, shipping: SHIPPING });
+    expect(ok.status).toBe(200);
+    expect(toOwner()).toHaveLength(1);
+    expect(toBuyer()).toHaveLength(1);
+    const [mail] = toBuyer();
+    expect(mail.subject).toContain("Recibimos tu aviso de transferencia");
+    expect(mail.text).toContain("todavía NO está confirmado");
+    expect(mail.text).not.toContain("Tu pedido está confirmado");
+    expect((await orders())[0].status).toBe("pending"); // el pago lo confirmás vos, no el aviso
+    for (const dato of [t.code, "Total a transferir: $2.000", "Alias:", "CBU/CVU:", "reservado hasta", "@byslfco", "Envío a domicilio"]) {
+      expect(mail.text, `el mail debería incluir "${dato}"`).toContain(dato);
+    }
+    // varios toques seguidos no repiten el mail
+    await post(transferNotify, "/api/checkout/transfer/notify", { orderId: t.orderId, shipping: SHIPPING });
+    expect(toBuyer()).toHaveLength(1);
+  });
+
+  it("a vos te llega un mail listo para avisarle al comprador que confirmaste el pago", async () => {
+    const res = await buy({ payment: "transfer" });
+    const t = (await res.json()).transfer as { orderId: string; code: string };
+    await post(transferNotify, "/api/checkout/transfer/notify", { orderId: t.orderId, shipping: SHIPPING });
+    const m = /mailto:(\S+)/.exec(toOwner()[0].text)!;
+    const url = new URL(m[0]);
+    expect(url.pathname).toBe("ana@mail.com");
+    expect(url.searchParams.get("subject")).toBe(`Confirmamos tu pago · ${t.code}`);
+    const body = url.searchParams.get("body")!;
+    for (const dato of ["Hola Ana!", "Hemos confirmado tu pago, te avisaremos por WhatsApp cuando tu pedido sea enviado!", t.code]) expect(body, dato).toContain(dato);
+    expect(toBuyer()).toHaveLength(1); // el único mail al comprador sigue siendo el "todavía NO está confirmado"
+    expect((await orders())[0].status).toBe("pending");
+  });
+
+  it("con retiro en Córdoba el aviso dice que te avisan cuando esté listo para retirar", async () => {
+    const res = await buy({ payment: "transfer", shipping: { method: "pickup", street: "", number: "", floor: "", city: "", zip: "", province: "" } });
+    const t = (await res.json()).transfer as { orderId: string };
+    await post(transferNotify, "/api/checkout/transfer/notify", { orderId: t.orderId, shipping: { ...SHIPPING, method: "pickup", street: "", number: "", floor: "", city: "", zip: "", province: "" } });
+    const body = new URL(/mailto:(\S+)/.exec(toOwner()[0].text)![0]).searchParams.get("body")!;
+    expect(body).toContain("cuando tu pedido esté listo para retirar");
+  });
+
+  it("transferencia sin MAIL_FROM: solo te llega a vos", async () => {
+    delete process.env.MAIL_FROM;
+    const res = await buy({ payment: "transfer" });
+    const t = (await res.json()).transfer as { orderId: string };
+    await post(transferNotify, "/api/checkout/transfer/notify", { orderId: t.orderId, shipping: SHIPPING });
+    expect(toBuyer()).toHaveLength(0);
+    expect(toOwner()).toHaveLength(1);
+  });
+});

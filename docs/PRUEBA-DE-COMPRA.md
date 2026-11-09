@@ -96,6 +96,7 @@ node --env-file=.env.local scripts/simulate-webhook.mjs 123456789
 | Dónde mirar | Qué tenés que ver |
 |---|---|
 | **Tu mail** (revisá Spam) | Asunto **"Nueva venta BYSLF · $1000"**, con: productos, talle, cantidad, nombre, email, código de área y celular, DNI, dirección completa (o la sucursal de Correo Argentino) e indicaciones, y el número de pago. **Un solo mail**. |
+| **El mail del comprador** (si definiste `MAIL_FROM`) | Asunto **"Tu pedido BYSLF está confirmado · BYSLF-XXXXXXXX"**, con los productos, el total, la entrega elegida y los plazos. Sin DNI. Si no hay `MAIL_FROM`, no se le manda nada (Resend solo deja escribirte a vos). En una transferencia le llega al tocar "Ya transferí": "Recibimos tu aviso de transferencia". |
 | **Supabase → Table Editor → `orders`** | Una fila con `status = paid`, `mp_payment_id` con el número del pago, y `terms_accepted_at` con la fecha. **No hay datos de envío en la base**: nombre, dirección, etc. te llegan solo en el mail de venta. |
 | **Supabase → `stock`** | `producto-01 / Negro / M` pasó de **3 a 2**. |
 | **Terminal del sitio** | Sin errores en rojo. |

@@ -1,3 +1,4 @@
+import { sendBuyerTransfer } from "@/lib/server/buyerMail";
 import { db } from "@/lib/server/db";
 import { markTransferNotified, resetTransferNotice, type OrderLine } from "@/lib/server/orders";
 import { allow } from "@/lib/server/ratelimit";
@@ -54,6 +55,8 @@ export async function POST(req: Request) {
       await resetTransferNotice(orderId);
       return json({ error: "No pudimos enviar tus datos. Probá de nuevo en un momento." }, 502);
     }
+    // Constancia para el comprador (no es parte de la venta: si falla, el aviso igual quedó hecho).
+    await sendBuyerTransfer({ orderId, items: order.items as OrderLine[], amount: order.amount, expiresAt: order.expires_at, shipping: ship.value });
     return json({ status: "sent" });
   } catch (e) {
     console.error("[transfer/notify]", e);

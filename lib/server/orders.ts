@@ -2,6 +2,7 @@ import "server-only";
 import type { Shipping } from "@/lib/shipping";
 import { getProduct } from "@/data/products";
 import { db } from "./db";
+import { sendBuyerPaid } from "./buyerMail";
 import { notifyOwner } from "./mail";
 import { shippingLines } from "./shippingText";
 import type { MpPayment } from "./mercadopago";
@@ -132,6 +133,16 @@ async function notifySale(payment: MpPayment, kind: "ok" | "review" | "duplicate
     ].join("\n");
     const prefix = kind === "duplicate" ? "⚠ PAGO DUPLICADO — " : review ? "⚠ REVISAR — " : "";
     await notifyOwner(`${prefix}Nueva venta BYSLF · $${payment.transaction_amount}`, text);
+    // Al comprador solo se le confirma una compra normal: los pedidos a revisar o duplicados los resolvés vos primero.
+    if (kind === "ok") {
+      await sendBuyerPaid({
+        orderId: String(payment.external_reference),
+        items: (order?.items ?? []) as OrderLine[],
+        total: payment.transaction_amount,
+        shippingCost: Number(payment.metadata?.shipping_cost ?? 0),
+        shipping: s,
+      });
+    }
   } catch (e) {
     console.error("[mail] no se pudo armar el aviso de venta", e);
   }

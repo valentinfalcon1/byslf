@@ -33,6 +33,17 @@ export function confirmLink(orderId: string): string | null {
   return t ? `${siteUrl()}/admin/confirmar?o=${orderId}&t=${t}` : null;
 }
 
+/**
+ * Link `mailto:` con el aviso "pago confirmado" ya redactado para el comprador: el dueño lo abre en su correo y lo envía.
+ * (El sitio no guarda el email del comprador, así que no puede mandar este mail solo.)
+ */
+export function buyerConfirmMailto(s: Pick<Shipping, "name" | "email" | "method">, orderId: string): string {
+  const code = orderCode(orderId);
+  const next = s.method === "pickup" ? "cuando tu pedido esté listo para retirar" : "cuando tu pedido sea enviado";
+  const body = `Hola ${s.name}!\n\nHemos confirmado tu pago, te avisaremos por WhatsApp ${next}!\n\nPedido: ${code}\n\nBYSLF`;
+  return `mailto:${s.email}?subject=${encodeURIComponent(`Confirmamos tu pago · ${code}`)}&body=${encodeURIComponent(body)}`;
+}
+
 /** Mail al dueño cuando el comprador toca "Ya transferí, enviar comprobante". Nunca lanza; devuelve si el mail salió. */
 export async function notifyTransfer(order: { id: string; amount: number | string; items: OrderLine[]; expires_at: string }, s: Shipping): Promise<boolean> {
   try {
@@ -56,6 +67,8 @@ export async function notifyTransfer(order: { id: string; amount: number | strin
       link
         ? `Cuando veas el comprobante y la plata en tu cuenta, confirmá el pago acá (no reenvíes este mail: quien tenga el link puede confirmar):\n${link}`
         : "⚠ Falta definir ADMIN_LINK_SECRET en .env.local: no hay link para confirmar. Confirmalo a mano en Supabase: select confirm_transfer('" + order.id + "');",
+      "",
+      `Después de confirmar, avisale al comprador con este mail ya redactado (se abre en tu correo, solo tenés que enviarlo):\n${buyerConfirmMailto(s, order.id)}`,
     ].join("\n");
     return await notifyOwner(`Transferencia por confirmar · $${order.amount} · ${orderCode(order.id)}`, text);
   } catch (e) {
