@@ -12,7 +12,7 @@ export const BUSINESS = {
   retention: "15 días",
   /** Número de inscripción en el Registro Nacional de Bases de Datos Personales, si corresponde. */
   dbRegistry: "[N° DE INSCRIPCIÓN, si corresponde]",
-  updated: "[FECHA DE ÚLTIMA ACTUALIZACIÓN]",
+  updated: "10 de noviembre de 2026",
 } as const;
 
 /** Reclamos del consumidor (verificar el link vigente al publicar). */
