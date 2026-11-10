@@ -247,8 +247,8 @@ test.describe("animaciones e interacción de las cards", () => {
   test("el lookbook se ve completo aunque la tienda esté cerrada (muestra el estilo de la marca)", async ({ page }) => {
     await page.goto("/");
     const imgs = page.locator("#lookbook img");
-    await expect(imgs).toHaveCount(3);
-    for (let i = 0; i < 3; i++) {
+    await expect(imgs).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
       const img = imgs.nth(i);
       await expect(img).toHaveAttribute("alt", /\S{3}/); // con descripción
       expect(await img.evaluate((el) => getComputedStyle(el).filter)).toBe("none"); // sin blur ni oscurecido

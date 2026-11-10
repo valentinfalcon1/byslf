@@ -16,7 +16,6 @@ import { DROP_DATE, LAUNCHED } from "@/lib/site";
 
 // El lookbook se ve siempre, también con la tienda cerrada: muestra el estilo de la marca.
 const LOOK = [
-  { src: "camiseta", alt: "Remera blanca con el logo BYSLF y las tres estrellas, colgada de una percha", box: "aspect-[3/4]" },
   { src: "poster-subte", alt: "Afiche con el logo BYSLF repetido, en una estación de subte con bancos azules", box: "aspect-[10/7]" },
   { src: "create-more", alt: "Las palabras CREATE MORE en letras negras, desenfocadas, sobre fondo claro", box: "aspect-[5/6]" },
 ];
@@ -84,10 +83,10 @@ export default async function Home() {
         <Reveal>
           <h2 className="display mb-10 text-5xl md:text-7xl">Lookbook</h2>
         </Reveal>
-        <div className="grid gap-4 md:grid-cols-[1fr_2fr_1fr] md:gap-6">
+        <div className="grid gap-4 md:grid-cols-[2fr_1fr] md:gap-6">
           {LOOK.map((l, i) => (
             <Reveal key={l.src} delay={i * 80}>
-              <div className={`group relative overflow-hidden rounded-card border border-line ${l.box} md:aspect-auto md:h-[400px]`}>
+              <div className={`group relative overflow-hidden rounded-card border border-line ${l.box} md:aspect-auto md:h-[480px]`}>
                 <Image
                   src={`/img/look/${l.src}.jpg`}
                   alt={l.alt}
