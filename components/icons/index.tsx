@@ -50,3 +50,6 @@ export const ChevronDownIcon = (p: P) => (
 export const InstagramIcon = (p: P) => (
   <Icon {...p}><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17.5 6.5h.01" /></Icon>
 );
+export const TikTokIcon = (p: P) => (
+  <Icon {...p}><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5" /><path d="M14 3c.4 2.6 2.1 4.3 5 4.5" /></Icon>
+);

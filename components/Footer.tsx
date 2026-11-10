@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CONSUMER_DEFENSE_URL } from "@/lib/legal";
 import { LAUNCHED, SOCIAL } from "@/lib/site";
 import { Button } from "./Button";
-import { InstagramIcon } from "./icons";
+import { InstagramIcon, TikTokIcon } from "./icons";
 import { Logo } from "./Logo";
 import { Stars } from "./Stars";
 
@@ -51,15 +51,26 @@ export function Footer() {
         <div>
           <Logo variant="wordmark" className="h-14 w-auto" />
           <p className="label mt-6 max-w-[28ch] text-star">Create more.</p>
-          <a
-            href={SOCIAL.instagram.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Instagram @${SOCIAL.instagram.user}`}
-            className="mt-6 inline-flex h-11 w-11 items-center justify-center rounded-btn border border-line text-paper transition-colors hover:bg-surface"
-          >
-            <InstagramIcon />
-          </a>
+          <div className="mt-6 flex gap-3">
+            <a
+              href={SOCIAL.instagram.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Instagram @${SOCIAL.instagram.user}`}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-btn border border-line text-paper transition-colors hover:bg-surface"
+            >
+              <InstagramIcon />
+            </a>
+            <a
+              href={SOCIAL.tiktok.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`TikTok @${SOCIAL.tiktok.user}`}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-btn border border-line text-paper transition-colors hover:bg-surface"
+            >
+              <TikTokIcon />
+            </a>
+          </div>
           {/* Obligatorio para vender a distancia: acceso visible y directo desde el inicio, sin registro. */}
           <div className="mt-6">
             <Button href="/arrepentimiento" variant="secondary">Botón de arrepentimiento</Button>
