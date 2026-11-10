@@ -6,7 +6,7 @@ const files = {
   stars: { src: "/img/logo/stars.png", w: 700, h: 311, alt: "BYSLF — tres estrellas" },
   // secondary (slate) trae el fondo incluido: usar sobre `night`. El resto es transparente.
   primary: { src: "/img/logo/byslf.png", w: 1600, h: 988, alt: "BYSLF — logo" },
-  secondary: { src: "/img/logo/secondary.png", w: 900, h: 543, alt: "BYSLF® — logo" },
+  secondary: { src: "/img/logo/secondary.png", w: 900, h: 543, alt: "BYSLF — logo" },
 } as const;
 
 export function Logo({

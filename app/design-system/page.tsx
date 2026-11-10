@@ -62,7 +62,7 @@ export default function DesignSystemPage() {
       <main>
         <div className="container-x py-14">
           <Tag>Design system</Tag>
-          <h1 className="display mt-4 text-6xl md:text-8xl">Sistema BYSLF®</h1>
+          <h1 className="display mt-4 text-6xl md:text-8xl">Sistema BYSLF</h1>
         </div>
 
         <Section title="Logos">

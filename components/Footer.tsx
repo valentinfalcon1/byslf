@@ -89,7 +89,7 @@ export function Footer() {
       </div>
 
       <div className="container-x mt-16 flex flex-col items-center justify-between gap-3 border-t border-line py-6 sm:flex-row">
-        <p className="label text-star">© BYSLF®</p>
+        <p className="label text-star">© BYSLF</p>
         <Stars className="text-star" />
         <p className="label text-star">EST. 2026 — Córdoba / ARG</p>
       </div>

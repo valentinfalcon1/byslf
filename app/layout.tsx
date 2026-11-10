@@ -21,7 +21,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "BYSLF® — Create more", template: "%s — BYSLF®" },
+  title: { default: "BYSLF — Create more", template: "%s — BYSLF" },
   description: "[DESCRIPCIÓN DE LA MARCA PARA SEO]",
 };
 
