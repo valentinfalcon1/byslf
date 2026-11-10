@@ -17,7 +17,7 @@ export default function Terminos() {
 
       <LegalSection title="2. Productos y precios">
         <p>
-          Los precios están expresados en pesos argentinos. {`[INDICAR SI INCLUYEN IVA / IMPUESTOS]`}. El costo de envío se informa antes de pagar.
+          Los precios están expresados en pesos argentinos. El costo de envío se informa antes de pagar.
           Las fotos son ilustrativas; pueden existir leves diferencias de color según tu pantalla.
         </p>
       </LegalSection>

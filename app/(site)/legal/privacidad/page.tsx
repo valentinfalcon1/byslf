@@ -40,7 +40,7 @@ export default function Privacidad() {
       <LegalSection title="4. Con quién los compartimos">
         <ul>
           <li><strong>Mercado Pago</strong>, para procesar el pago.</li>
-          <li><strong>{`[EMPRESA DE CORREO / LOGÍSTICA]`}</strong>, para entregarte el pedido (reciben tu nombre, dirección y teléfono).</li>
+          <li><strong>Correo Argentino</strong>, para entregarte el pedido (reciben tu nombre, dirección y teléfono).</li>
           <li>Proveedores de infraestructura que nos prestan servicio de alojamiento, base de datos y envío de emails ({`[PROVEEDORES — ej. Supabase, Vercel, Resend]`}). Pueden almacenar datos en servidores ubicados fuera de Argentina ({`[PAÍS / REGIÓN]`}), lo que implica una transferencia internacional de datos.</li>
           <li>Autoridades, cuando una norma o una orden judicial lo exija.</li>
         </ul>

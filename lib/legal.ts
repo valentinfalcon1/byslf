@@ -9,7 +9,7 @@ export const BUSINESS = {
   address: "Córdoba, Argentina", // ⚠ PROVISORIO: antes de empezar a vender, poner el domicilio comercial real (oficina, coworking, etc.)
   email: "byslfco@gmail.com",
   /** Plazo que declarás para conservar datos de pedidos (ej. el que corresponda por obligaciones contables/fiscales). */
-  retention: "[PLAZO DE CONSERVACIÓN]",
+  retention: "15 días",
   /** Número de inscripción en el Registro Nacional de Bases de Datos Personales, si corresponde. */
   dbRegistry: "[N° DE INSCRIPCIÓN, si corresponde]",
   updated: "[FECHA DE ÚLTIMA ACTUALIZACIÓN]",
