@@ -1,10 +1,5 @@
-/**
- * Días que faltan para el drop. `dropDate` viene de lib/site.ts como "dd.mm" (ej. "15.12") o "dd.mm.aaaa".
- * Sin año se toma la próxima vez que llega esa fecha. Se cuenta por DÍAS (no por horas) a propósito:
- * no hay una hora de lanzamiento definida y no queremos inventarla.
- * El "hoy" se calcula en hora de Córdoba, para que todos vean el mismo número sin importar su zona.
- */
-export function daysUntil(dropDate: string | null, now: Date = new Date()): number | null {
+/** Fecha del drop (medianoche UTC de ese día) y "hoy" en Córdoba. Sin año explícito, toma la próxima vez que llega esa fecha. */
+function resolveTarget(dropDate: string | null, now: Date): { target: number; todayUTC: number } | null {
   if (!dropDate) return null;
   const m = /^(\d{1,2})\.(\d{1,2})(?:\.(\d{4}))?$/.exec(dropDate.trim());
   if (!m) return null;
@@ -28,9 +23,39 @@ export function daysUntil(dropDate: string | null, now: Date = new Date()): numb
   if (target === null) return null;
   if (explicitYear === null && target < todayUTC) target = at(today[0] + 1);
   if (target === null) return null;
+  return { target, todayUTC };
+}
 
-  const days = Math.round((target - todayUTC) / 86_400_000);
+/**
+ * Días que faltan para el drop. `dropDate` viene de lib/site.ts como "dd.mm" (ej. "15.12") o "dd.mm.aaaa".
+ * Sin año se toma la próxima vez que llega esa fecha. Se cuenta por DÍAS (no por horas) a propósito:
+ * no hay una hora de lanzamiento definida y no queremos inventarla.
+ * El "hoy" se calcula en hora de Córdoba, para que todos vean el mismo número sin importar su zona.
+ */
+export function daysUntil(dropDate: string | null, now: Date = new Date()): number | null {
+  const r = resolveTarget(dropDate, now);
+  if (!r) return null;
+  const days = Math.round((r.target - r.todayUTC) / 86_400_000);
   return days < 0 ? null : days; // con año explícito y ya pasada: no se muestra
+}
+
+/** Hora de Córdoba (UTC-3, sin horario de verano) a la que arranca el día del drop: las 00:00. */
+const LAUNCH_OFFSET_MS = 3 * 3_600_000;
+
+export type TimeLeft = { days: number; hours: number; minutes: number; seconds: number };
+
+/**
+ * Cuenta regresiva para el temporizador, hasta las 00:00 (hora de Córdoba) del día del drop.
+ * ⚠ La hora (00:00) es una suposición: si el drop sale a otra hora, se cambia LAUNCH_OFFSET_MS.
+ * Devuelve ceros una vez llegada la hora; null si la fecha es inválida o ya pasó (con año explícito).
+ */
+export function timeLeft(dropDate: string | null, now: Date = new Date()): TimeLeft | null {
+  const r = resolveTarget(dropDate, now);
+  if (!r) return null;
+  const ms = r.target + LAUNCH_OFFSET_MS - now.getTime();
+  if (ms < 0 && r.target < r.todayUTC) return null; // con año explícito y ya pasada
+  const total = Math.max(0, Math.floor(ms / 1000));
+  return { days: Math.floor(total / 86_400), hours: Math.floor((total % 86_400) / 3_600), minutes: Math.floor((total % 3_600) / 60), seconds: total % 60 };
 }
 
 /** Texto para mostrar. */

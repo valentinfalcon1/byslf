@@ -11,7 +11,7 @@ export default function Terminos() {
       <LegalSection title="1. Quiénes somos">
         <p>
           Este sitio es operado por <strong>{BUSINESS.legalName}</strong> (CUIT {BUSINESS.cuit}), titular de la marca {BUSINESS.brand}, con domicilio en {BUSINESS.address}.
-          Contacto: {BUSINESS.email} · {BUSINESS.phone}.
+          Contacto: {BUSINESS.email}.
         </p>
       </LegalSection>
 

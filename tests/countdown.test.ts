@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countdownText, daysUntil } from "@/lib/countdown";
+import { countdownText, daysUntil, timeLeft } from "@/lib/countdown";
 
 // 22 de octubre de 2026, 15:00 en Córdoba (UTC-3) = 18:00 UTC
 const NOW = new Date("2026-10-22T18:00:00Z");
@@ -40,4 +40,31 @@ describe("countdownText", () => {
     [2, "Faltan 2 días"],
     [54, "Faltan 54 días"],
   ])("%s → %s", (days, text) => expect(countdownText(days)).toBe(text));
+});
+
+describe("timeLeft (temporizador)", () => {
+  // El drop sale a las 00:00 de Córdoba (UTC-3) = 03:00 UTC del día de la fecha.
+  it("desde el 22/10 a las 15:00 (Córdoba) faltan 53 días y 9 horas para las 00:00 del 15.12", () => {
+    expect(timeLeft("15.12", NOW)).toEqual({ days: 53, hours: 9, minutes: 0, seconds: 0 });
+  });
+  it("cuenta hasta el segundo", () => {
+    expect(timeLeft("15.12", new Date("2026-12-14T23:58:59Z"))).toEqual({ days: 0, hours: 3, minutes: 1, seconds: 1 });
+    expect(timeLeft("15.12", new Date("2026-12-15T02:59:59Z"))).toEqual({ days: 0, hours: 0, minutes: 0, seconds: 1 });
+  });
+  it("llegada la hora queda en ceros (no desaparece ni se va al año que viene el mismo día)", () => {
+    expect(timeLeft("15.12", new Date("2026-12-15T03:00:00Z"))).toEqual({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    expect(timeLeft("15.12", new Date("2026-12-15T15:00:00Z"))).toEqual({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  });
+  it("sin año, al día siguiente ya apunta al año que viene", () => {
+    expect(timeLeft("15.12", new Date("2026-12-16T15:00:00Z"))!.days).toBeGreaterThan(360);
+  });
+  it("usa la hora de Córdoba: a las 01:00 UTC del 15/12 todavía es 14/12 allá", () => {
+    expect(timeLeft("15.12", new Date("2026-12-15T01:00:00Z"))).toEqual({ days: 0, hours: 2, minutes: 0, seconds: 0 });
+  });
+  it("con año explícito que ya pasó, no muestra nada", () => expect(timeLeft("15.12.2025", NOW)).toBeNull());
+  it.each([null, "", "???", "32.01", "31.02", "15.13"])("valor inválido (%s) → null", (v) => expect(timeLeft(v, NOW)).toBeNull());
+  it("los días coinciden con daysUntil (sin contar la hora)", () => {
+    const t = timeLeft("15.12", NOW)!;
+    expect(t.days).toBe(daysUntil("15.12", NOW)! - 1); // faltan 53 días y 9 h; por calendario son 54 días
+  });
 });

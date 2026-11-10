@@ -244,6 +244,23 @@ test.describe("animaciones e interacción de las cards", () => {
     await expect(card(page, 2).locator(".card3d")).toHaveClass(/is-flipped/);
   });
 
+  test("el temporizador está debajo del logo y cuenta en vivo hasta el drop", async ({ page }) => {
+    await page.goto("/");
+    const timer = page.getByTestId("hero-timer");
+    await expect(timer).toBeVisible();
+    await expect(timer.locator("[data-unit]")).toHaveCount(4);
+    // debajo del logo principal y antes del título "Create more"
+    const logo = (await page.locator("main img[alt*='BYSLF' i], main svg").first().boundingBox())!;
+    const t = (await timer.boundingBox())!;
+    const title = (await page.getByRole("heading", { level: 1 }).boundingBox())!;
+    expect(t.y).toBeGreaterThan(logo.y);
+    expect(t.y).toBeLessThan(title.y);
+    // con números reales y moviéndose
+    await expect(timer.locator('[data-unit="Seg"]')).toHaveText(/^\d{2}$/);
+    const first = await timer.locator('[data-unit="Seg"]').textContent();
+    await expect.poll(() => timer.locator('[data-unit="Seg"]').textContent(), { timeout: 4000 }).not.toBe(first);
+  });
+
   test("el lookbook se ve completo aunque la tienda esté cerrada (muestra el estilo de la marca)", async ({ page }) => {
     await page.goto("/");
     const imgs = page.locator("#lookbook img");

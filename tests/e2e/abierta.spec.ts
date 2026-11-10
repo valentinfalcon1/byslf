@@ -302,6 +302,11 @@ test.describe("tienda y producto", () => {
     await expect(table.locator("tr[aria-current=true] th")).toHaveText("M");
   });
 
+  test("con la tienda abierta no hay temporizador en la portada", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("hero-timer")).toHaveCount(0);
+  });
+
   test("un producto que no existe da 404", async ({ page }) => {
     const res = await page.goto("/producto/no-existe");
     expect(res?.status()).toBe(404);

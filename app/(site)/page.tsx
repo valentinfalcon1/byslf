@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { Button } from "@/components/Button";
 import { DropDate } from "@/components/DropDate";
 import { GlobeIcon } from "@/components/icons";
+import { HeroTimer } from "@/components/HeroTimer";
 import { Logo } from "@/components/Logo";
 import { Marquee } from "@/components/Marquee";
 import { Newsletter } from "@/components/Newsletter";
@@ -41,6 +42,11 @@ export default async function Home() {
           <div className="pop mt-4 w-full max-w-[560px]" style={delay(0.2)}>
             <Logo variant="primary" priority className="floaty w-full" />
           </div>
+          {!LAUNCHED && DROP_DATE && (
+            <div className="rise" style={delay(0.4)}>
+              <HeroTimer dropDate={DROP_DATE} />
+            </div>
+          )}
           <h1 className="rise display mt-6 text-4xl sm:text-6xl md:mt-10 md:text-7xl" style={delay(0.55)}>Create more</h1>
           <div className="rise mt-8 flex flex-wrap justify-center gap-6" style={delay(0.7)}>
             {LAUNCHED ? <Button href="/tienda" className="pulse">Ver el drop</Button> : <Button href="#newsletter" className="pulse">Quiero el aviso</Button>}
