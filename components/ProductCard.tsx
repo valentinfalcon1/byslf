@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Product } from "@/data/products";
 import { CATEGORIES } from "@/data/products";
 import { formatPrice } from "@/lib/format";
+import { transferPrice } from "@/lib/transfer";
 import { Tag } from "./Tag";
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
@@ -25,6 +26,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <h3 className="label font-bold text-paper">{product.name}</h3>
           <p className="label text-star">{category}</p>
           <p className="label font-bold text-paper">{formatPrice(product.price)}</p>
+          {product.price !== null && <p className="label text-[11px] text-star">{formatPrice(transferPrice(product.price))} con transferencia</p>}
         </div>
       </Link>
     </article>

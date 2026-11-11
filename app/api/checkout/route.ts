@@ -7,7 +7,7 @@ import { checkOrigin, clientIp, json, readJson, siteUrl } from "@/lib/server/sec
 import { validateShipping } from "@/lib/shipping";
 import { quoteShipping } from "@/lib/shippingCost";
 import { LAUNCHED } from "@/lib/site";
-import { TRANSFER_RESERVE_MINUTES, orderCode } from "@/lib/transfer";
+import { TRANSFER_RESERVE_MINUTES, orderCode, transferPrice } from "@/lib/transfer";
 
 type Line = { slug?: unknown; color?: unknown; size?: unknown; qty?: unknown };
 
@@ -60,7 +60,9 @@ export async function POST(req: Request) {
     if (product.price === null) return json({ error: "Hay un producto sin precio definido." }, 409);
     if (!Number.isFinite(product.price) || product.price <= 0) return json({ error: "Hay un producto con un precio inválido." }, 409);
 
-    items.push({ id: `${product.slug}|${l.color}|${l.size}`, title: `${product.name} — ${l.color} / ${l.size}`, quantity: qty, unit_price: product.price, currency_id: "ARS" });
+    // Con transferencia se aplica el descuento; con Mercado Pago, el precio de lista. Siempre lo decide el servidor.
+    const unit = payment === "transfer" ? transferPrice(product.price) : product.price;
+    items.push({ id: `${product.slug}|${l.color}|${l.size}`, title: `${product.name} — ${l.color} / ${l.size}`, quantity: qty, unit_price: unit, currency_id: "ARS" });
     meta.push({ slug: product.slug, color: l.color, size: l.size, qty });
   }
 

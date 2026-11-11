@@ -2,6 +2,12 @@ import { SOCIAL } from "@/lib/site";
 
 /** Pago por transferencia: datos y ayudantes compartidos entre el formulario (navegador) y el servidor. */
 
+/** Descuento por pagar con transferencia (en %). El precio de lista es el de tarjeta / Mercado Pago. */
+export const TRANSFER_DISCOUNT_PCT = 10;
+
+/** Precio con transferencia de un producto de precio `price` (redondeado al peso). */
+export const transferPrice = (price: number): number => Math.round((price * (100 - TRANSFER_DISCOUNT_PCT)) / 100);
+
 /** Cuánto tiempo se le guarda el stock a quien elige pagar por transferencia. */
 export const TRANSFER_RESERVE_MINUTES = 24 * 60;
 

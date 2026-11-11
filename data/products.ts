@@ -39,19 +39,19 @@ const GRIS_TOPO: Color[] = [{ name: "Gris topo", hex: "#3e3a3b" }]; // tomado de
 const img = (name: string) => `/img/products/${name}.jpg`;
 
 export const products: Product[] = [
-  { id: "p01", slug: "producto-01", name: "Byslf patch negra", category: "remeras", price: null, tag: "Drop 001", colors: NEGRO, sizes: SIZES, images: [img("byslf-patch-negra")] },
-  { id: "p02", slug: "producto-02", name: "Byslf patch gris topo", category: "remeras", price: null, tag: "Drop 001", colors: GRIS_TOPO, sizes: SIZES, images: [img("byslf-patch-gris-topo")] },
-  { id: "p03", slug: "producto-03", name: "Bermuda ID negra", category: "pantalones", price: null, tag: "Drop 001", colors: NEGRO, sizes: SIZES, images: [img("bermuda-id-negra")] },
+  { id: "p01", slug: "producto-01", name: "Byslf patch negra", category: "remeras", price: 55000, tag: "Drop 001", colors: NEGRO, sizes: SIZES, images: [img("byslf-patch-negra")] },
+  { id: "p02", slug: "producto-02", name: "Byslf patch gris topo", category: "remeras", price: 55000, tag: "Drop 001", colors: GRIS_TOPO, sizes: SIZES, images: [img("byslf-patch-gris-topo")] },
+  { id: "p03", slug: "producto-03", name: "Bermuda ID negra", category: "pantalones", price: 62000, tag: "Drop 001", colors: NEGRO, sizes: SIZES, images: [img("bermuda-id-negra")] },
 ];
 
 /**
- * SOLO PARA PROBAR: con DEV_TEST_PRICE=1000 en .env.local, los productos sin precio quedan a $1000 para poder
- * hacer una compra de prueba sin editar el catálogo. Se ignora por completo en producción.
+ * SOLO PARA PROBAR: con DEV_TEST_PRICE=1000 en .env.local, TODOS los productos quedan a $1000 para poder
+ * hacer una compra de prueba con Mercado Pago (que no deja pagar montos grandes de prueba). Se ignora por completo en producción.
  */
 function withTestPrice(p: Product): Product {
   const test = Number(process.env.DEV_TEST_PRICE);
   if (process.env.NODE_ENV === "production" || !Number.isFinite(test) || test <= 0) return p;
-  return p.price === null ? { ...p, price: test } : p;
+  return { ...p, price: test };
 }
 
 export async function getProducts(): Promise<Product[]> {

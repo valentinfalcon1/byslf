@@ -435,3 +435,20 @@ describe("envío a domicilio apagado (como en producción)", () => {
     }
   });
 });
+
+describe("descuento por transferencia en el resumen", () => {
+  const norm = (t: string | null | undefined) => (t ?? "").replace(/\s/g, " ");
+  const row = (name: RegExp) => screen.getByText(name).nextSibling?.textContent;
+
+  it("con Mercado Pago no hay descuento; con transferencia se descuenta el 10% de los productos (no del envío)", () => {
+    renderForm();
+    fill({ province: "Córdoba", zip: "5000" }); // capital: envío gratis
+    expect(screen.queryByText(/Descuento transferencia/)).toBeNull();
+    expect(norm(screen.getByText("Total").nextSibling?.textContent)).toBe("$ 4.500"); // 2 x 1000 + 2500
+    fireEvent.click(screen.getByLabelText(/Transferencia bancaria/i));
+    expect(norm(row(/Descuento transferencia \(10%\)/))).toBe("-$ 450");
+    expect(norm(screen.getByText("Total").nextSibling?.textContent)).toBe("$ 4.050");
+    fireEvent.click(screen.getByLabelText(/Mercado Pago/i));
+    expect(screen.queryByText(/Descuento transferencia/)).toBeNull();
+  });
+});

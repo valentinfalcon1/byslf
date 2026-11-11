@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { formatPrice } from "@/lib/format";
+import { TRANSFER_DISCOUNT_PCT, transferPrice } from "@/lib/transfer";
 import { goTo } from "@/lib/navigate";
 import { EMPTY_SHIPPING, PROVINCES, validateShipping, type Shipping, type ShippingErrors } from "@/lib/shipping";
 import { SOCIAL } from "@/lib/site";
@@ -45,10 +46,13 @@ export function CheckoutForm() {
   const branch = form.method === "branch";
   const home = form.method === "delivery";
   // Solo para mostrar: el servidor vuelve a calcular el envío al cobrar.
-  const quote = subtotal === null ? null : quoteShipping(form.method, form.province, form.zip, subtotal);
+  // Con transferencia los productos tienen descuento; el envío gratis por monto se mide sobre lo que realmente se paga.
+  const payable = subtotal === null ? null : pay === "transfer" ? items.reduce((n, i) => n + transferPrice(i.price ?? 0) * i.qty, 0) : subtotal;
+  const discount = subtotal !== null && payable !== null ? subtotal - payable : 0;
+  const quote = payable === null ? null : quoteShipping(form.method, form.province, form.zip, payable);
   const shippingLabel = !quote ? "[A DEFINIR]" : !quote.ok ? (quote.reason === "no_province" ? "Elegí tu provincia" : quote.reason === "no_zip" ? "Ingresá tu código postal" : "[A DEFINIR]") : quote.cost === 0 ? "Gratis" : formatPrice(quote.cost);
   const noRate = quote?.ok === false && quote.reason === "no_rate";
-  const total = subtotal !== null && quote?.ok ? subtotal + quote.cost : null;
+  const total = payable !== null && quote?.ok ? payable + quote.cost : null;
 
   const setMethod = (m: DeliveryMethod) => {
     setForm((f) => ({ ...f, method: m }));
@@ -227,7 +231,7 @@ export function CheckoutForm() {
           <legend className="display mb-5 text-3xl">Cómo pagás</legend>
           {([
             ["mp", "Mercado Pago", "Tarjeta, dinero en cuenta y otros medios. Se confirma al instante."],
-            ["transfer", "Transferencia bancaria", "Reservamos tu pedido 24 horas. Nos mandás el comprobante por Instagram."],
+            ["transfer", `Transferencia bancaria · ${TRANSFER_DISCOUNT_PCT}% OFF`, "Reservamos tu pedido 24 horas. Nos mandás el comprobante por Instagram."],
           ] as const).map(([value, title, hint]) => (
             <label key={value} className={`flex cursor-pointer items-start gap-3 rounded-btn border bg-surface p-4 ${pay === value ? "border-paper" : "border-line"}`}>
               <input type="radio" name="payment" value={value} checked={pay === value} onChange={() => setPay(value)} className="mt-1 h-5 w-5 shrink-0 accent-paper" />
@@ -258,6 +262,7 @@ export function CheckoutForm() {
         </ul>
         <dl className="label mt-4 space-y-2 border-t border-line pt-4">
           <div className="flex justify-between"><dt className="text-star">Subtotal</dt><dd className="font-bold">{formatPrice(subtotal)}</dd></div>
+          {discount > 0 && <div className="flex justify-between"><dt className="text-star">Descuento transferencia ({TRANSFER_DISCOUNT_PCT}%)</dt><dd className="font-bold">-{formatPrice(discount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-star">Envío</dt><dd className="font-bold">{shippingLabel}</dd></div>
           <div className="flex justify-between border-t border-line pt-2"><dt className="text-star">Total</dt><dd className="font-bold">{formatPrice(total)}</dd></div>
         </dl>

@@ -610,7 +610,7 @@ describe("pago por transferencia", () => {
 
   it("elegir transferencia reserva el stock y devuelve monto y código, SIN llamar a Mercado Pago ni mandar mails", async () => {
     const t = await reserveT({ items: [{ slug: "producto-01", color: "Negro", size: "M", qty: 2 }] });
-    expect(t.amount).toBe(2000);
+    expect(t.amount).toBe(1800);
     expect(t.code).toBe(`BYSLF-${t.orderId.slice(0, 8).toUpperCase()}`);
     expect(preferences()).toHaveLength(0);
     expect(mails()).toHaveLength(0);
@@ -898,7 +898,7 @@ describe("mails al comprador", () => {
     expect(mail.text).toContain("todavía NO está confirmado");
     expect(mail.text).not.toContain("Tu pedido está confirmado");
     expect((await orders())[0].status).toBe("pending"); // el pago lo confirmás vos, no el aviso
-    for (const dato of [t.code, "Total a transferir: $2.000", "Alias:", "CBU/CVU:", "reservado hasta", "@byslfco", "Envío a domicilio"]) {
+    for (const dato of [t.code, "Total a transferir: $1.800", "Alias:", "CBU/CVU:", "reservado hasta", "@byslfco", "Envío a domicilio"]) {
       expect(mail.text, `el mail debería incluir "${dato}"`).toContain(dato);
     }
     // varios toques seguidos no repiten el mail
@@ -935,5 +935,23 @@ describe("mails al comprador", () => {
     await post(transferNotify, "/api/checkout/transfer/notify", { orderId: t.orderId, shipping: SHIPPING });
     expect(toBuyer()).toHaveLength(0);
     expect(toOwner()).toHaveLength(1);
+  });
+});
+
+describe("descuento por transferencia", () => {
+  it("transferPrice: 10% menos, redondeado al peso (los precios reales dan $49.500 y $55.800)", async () => {
+    const { transferPrice } = await import("@/lib/transfer");
+    expect(transferPrice(55000)).toBe(49500);
+    expect(transferPrice(62000)).toBe(55800);
+    expect(transferPrice(1005)).toBe(905); // 904,5 → 905
+  });
+
+  it("con transferencia se cobra el precio con descuento; con Mercado Pago, el de lista", async () => {
+    const rt = await buy({ payment: "transfer", items: [{ slug: "producto-01", color: "Negro", size: "M", qty: 1 }] });
+    expect(rt.status).toBe(200);
+    expect((await rt.json()).transfer.amount).toBe(900); // $1000 de prueba - 10%
+    const res = await buy({ items: [{ slug: "producto-01", color: "Negro", size: "M", qty: 1 }] });
+    expect(res.status).toBe(200);
+    expect(preferences().at(-1)!.items[0].unit_price).toBe(1000);
   });
 });

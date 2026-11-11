@@ -4,6 +4,7 @@ import Image from "next/image";
 import { forwardRef, useRef, useState } from "react";
 import type { Product } from "@/data/products";
 import { formatPrice } from "@/lib/format";
+import { TRANSFER_DISCOUNT_PCT, transferPrice } from "@/lib/transfer";
 import { POLICY } from "@/lib/legal";
 import { sizeChartFor, type SizeChart } from "@/data/sizeCharts";
 import { Button } from "./Button";
@@ -72,7 +73,11 @@ export function ProductDetail({ product }: { product: Product }) {
         <h1 className="display text-4xl md:text-6xl">{product.name}</h1>
         <span aria-hidden="true" className="mt-5 block h-0.5 w-12 bg-slate" />
         <p className="label mt-4 text-xl font-bold">{formatPrice(product.price)}</p>
-        <p className="label mt-1 text-star">[CUOTAS — ej. 3 cuotas sin interés]</p>
+        {product.price !== null && (
+          <p className="label mt-1 text-star">
+            <span className="font-bold text-paper">{formatPrice(transferPrice(product.price))}</span> con transferencia ({TRANSFER_DISCOUNT_PCT}% OFF)
+          </p>
+        )}
 
         <fieldset className="mt-8">
           <legend className="label mb-3 font-bold">Color: <span className="text-slate-text">{color.name}</span></legend>
