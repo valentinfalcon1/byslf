@@ -31,10 +31,10 @@ export const ZONE_LABEL: Record<Zone, string> = {
  */
 export const RATES: Record<Zone, number | null> = {
   capital: 0, // envío gratis SOLO en Córdoba capital
-  cordoba: null,
-  centro: null,
-  interior: null,
-  patagonia: null,
+  cordoba: null, // [A DEFINIR] resto de la provincia de Córdoba
+  centro: 6739, // cotización aproximada (Buenos Aires)
+  interior: 7500, // cotización aproximada (Corrientes, Jujuy)
+  patagonia: 7800, // cotización aproximada (Chubut, Tierra del Fuego)
 };
 
 /**
@@ -42,11 +42,11 @@ export const RATES: Record<Zone, number | null> = {
  * Acá no hay "capital gratis": a sucursal solo es gratis si la compra supera FREE_SHIPPING_OVER o si cargás 0 en la zona.
  */
 export const BRANCH_RATES: Record<Zone, number | null> = {
-  capital: null,
-  cordoba: null,
-  centro: null,
-  interior: null,
-  patagonia: null,
+  capital: null, // [A DEFINIR]
+  cordoba: null, // [A DEFINIR]
+  centro: 6739, // mismo valor que domicilio hasta cotizar sucursal por separado
+  interior: 7500,
+  patagonia: 7800,
 };
 
 const ZONE_OF: Record<string, Zone> = {

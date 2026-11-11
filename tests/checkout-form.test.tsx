@@ -235,12 +235,12 @@ describe("costo y método de entrega", () => {
     expect(total()).toMatch(/4\.500/);
   });
 
-  it("sin provincia pide elegirla, y a una zona sin tarifa avisa que no se envía todavía", () => {
+  it("sin provincia pide elegirla, y con una provincia con tarifa muestra el costo", () => {
     renderForm();
     expect(envio()).toBe("Elegí tu provincia");
     fill({ province: "Salta" });
-    expect(envio()).toBe("[A DEFINIR]");
-    expect(screen.getByText(/Todavía no enviamos a tu zona/i)).toBeTruthy();
+    expect(envio().replace(/\s/g, " ")).toBe("$ 7.500");
+    expect(screen.queryByText(/Todavía no enviamos a tu zona/i)).toBeNull();
   });
 
   it("en el resto de Córdoba no es gratis, y sin código postal lo pide", () => {
@@ -402,7 +402,7 @@ describe("envío a sucursal de Correo Argentino", () => {
   it("sin tarifa para esa provincia avisa que no se envía todavía", () => {
     renderForm();
     chooseBranch();
-    fill({ province: "Santa Fe" });
+    fill({ province: "Córdoba" });
     expect(screen.getByText(/Todavía no enviamos a tu zona/i)).toBeTruthy();
   });
 

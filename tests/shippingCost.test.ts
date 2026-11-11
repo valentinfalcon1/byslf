@@ -79,10 +79,12 @@ describe("quoteShipping", () => {
     expect(quoteShipping("delivery", "Atlantis", "5000", 5000, PAID)).toEqual({ ok: false, reason: "no_province" });
   });
 
-  it("la tabla real: solo Córdoba capital es gratis; el resto está pendiente de definir", () => {
+  it("la tabla real: Córdoba capital gratis, el resto de Córdoba pendiente, y el país con tarifa", () => {
     expect(RATES.capital).toBe(0);
     expect(RATES.cordoba).toBeNull();
-    expect(RATES.centro).toBeNull();
+    expect(RATES.centro).toBe(6739);
+    expect(RATES.interior).toBe(7500);
+    expect(RATES.patagonia).toBe(7800);
   });
 });
 
@@ -104,13 +106,17 @@ describe("envío a sucursal", () => {
   });
 
   it("supera los $100.000: gratis aunque no haya tarifa", () => {
-    expect(quoteShipping("branch", "Salta", "", FREE_SHIPPING_OVER + 1, BRANCH_RATES)).toEqual({ ok: true, cost: 0, free: "threshold" });
-    expect(quoteShipping("branch", "Salta", "", FREE_SHIPPING_OVER, BRANCH_RATES)).toEqual({ ok: false, reason: "no_rate" });
+    expect(quoteShipping("branch", "Córdoba", "", FREE_SHIPPING_OVER + 1, BRANCH_RATES)).toEqual({ ok: true, cost: 0, free: "threshold" });
+    expect(quoteShipping("branch", "Córdoba", "", FREE_SHIPPING_OVER, BRANCH_RATES)).toEqual({ ok: false, reason: "no_rate" });
   });
 
-  it("con las tarifas todavía sin definir no se vende a sucursal (hasta que se carguen)", () => {
-    for (const zone of Object.keys(BRANCH_RATES) as Zone[]) expect(BRANCH_RATES[zone], zone).toBeNull();
-    expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: false, reason: "no_rate" });
+  it("a sucursal: Córdoba sigue sin tarifa (no se vende) y el resto del país tiene la suya", () => {
+    expect(BRANCH_RATES.capital).toBeNull();
+    expect(BRANCH_RATES.cordoba).toBeNull();
+    expect(quoteShipping("branch", "Córdoba", "", 5000)).toEqual({ ok: false, reason: "no_rate" });
+    expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: true, cost: 6739, free: null });
+    expect(quoteShipping("branch", "Salta", "", 5000)).toEqual({ ok: true, cost: 7500, free: null });
+    expect(quoteShipping("branch", "Chubut", "", 5000)).toEqual({ ok: true, cost: 7800, free: null });
   });
 
   it("la tarifa de domicilio por defecto no se mezcla con la de sucursal", () => {

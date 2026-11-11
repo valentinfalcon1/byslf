@@ -220,6 +220,7 @@ describe("compra completa", () => {
 describe("stock", () => {
   describe("costo de envío", () => {
     const FAR = { province: "Salta", city: "Salta", zip: "4400" };
+    const NO_RATE = { province: "Córdoba", city: "Villa María", zip: "5900" }; // resto de Córdoba: todavía sin tarifa
     const lines = (n: number) => Array.from({ length: n }, () => ({ slug: "producto-01", color: "Negro", size: "L", qty: 10 }));
 
     it("en Córdoba capital el envío es gratis: no se agrega ningún ítem de envío", async () => {
@@ -243,7 +244,7 @@ describe("stock", () => {
     });
 
     it("a una zona sin tarifa definida no se cobra ni se reserva stock (y se ofrece el retiro)", async () => {
-      const res = await buy({ shipping: FAR });
+      const res = await buy({ shipping: NO_RATE });
       expect(res.status).toBe(422);
       expect((await res.json()).error).toContain("retiro");
       expect(await stockOf()).toBe(3);
@@ -264,7 +265,7 @@ describe("stock", () => {
     const BRANCH = { method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", street: "", number: "", floor: "", city: "", zip: "" };
 
     it("a sucursal sin tarifa cargada no se vende (y no se reserva stock)", async () => {
-      const res = await buy({ shipping: BRANCH });
+      const res = await buy({ shipping: { ...BRANCH, province: "Córdoba" } });
       expect(res.status).toBe(422);
       expect(await stockOf()).toBe(3);
       expect(await orders()).toHaveLength(0);
