@@ -239,7 +239,7 @@ describe("costo y método de entrega", () => {
     renderForm();
     expect(envio()).toBe("Elegí tu provincia");
     fill({ province: "Salta" });
-    expect(envio().replace(/\s/g, " ")).toBe("$ 7.500");
+    expect((envio() ?? "").replace(/\s/g, " ")).toBe("$ 7.500");
     expect(screen.queryByText(/Todavía no enviamos a tu zona/i)).toBeNull();
   });
 
