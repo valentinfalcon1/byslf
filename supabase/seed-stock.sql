@@ -13,12 +13,12 @@ insert into stock (slug, color, size, qty) values
   ('producto-02', 'Gris topo', 'M', 16),
   ('producto-02', 'Gris topo', 'L',  8),
   -- producto-03 · Bermuda ID negra
-  ('producto-03', 'Negro',     'S',  7),
-  ('producto-03', 'Negro',     'M', 15),
-  ('producto-03', 'Negro',     'L',  8)
+  ('producto-03', 'Negro',     'S',  5),
+  ('producto-03', 'Negro',     'M',  8),
+  ('producto-03', 'Negro',     'L',  7)
 on conflict (slug, color, size) do update set qty = excluded.qty;
 
 -- Para sacar el stock de PRUEBA (producto-01 con 3 unidades) no hace falta borrar nada: este script lo pisa.
 -- Verificar:
 -- select slug, color, size, qty from stock order by slug, color, size;
--- Total esperado: 6+16+8 + 6+16+8 + 7+15+8 = 90 unidades.
+-- Total esperado: 6+16+8 + 6+16+8 + 5+8+7 = 80 unidades.
