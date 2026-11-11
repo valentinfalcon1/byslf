@@ -258,7 +258,7 @@ describe("costo y método de entrega", () => {
     fireEvent.click(screen.getByLabelText(/Retiro en Córdoba/i));
     expect(envio()).toBe("Gratis");
     expect(document.getElementById("street")).toBeNull();
-    expect(screen.getByText(/PUNTO DE RETIRO/)).toBeTruthy();
+    expect(screen.getByText(/escribinos por Instagram/i)).toBeTruthy();
     expect(screen.queryByText(/Todavía no enviamos a tu zona/i)).toBeNull();
   });
 
@@ -399,11 +399,17 @@ describe("envío a sucursal de Correo Argentino", () => {
     expect(body.shipping).toMatchObject({ method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", areaCode: "351", phone: "5551234" });
   });
 
-  it("sin tarifa para esa provincia avisa que no se envía todavía", () => {
-    renderForm();
-    chooseBranch();
-    fill({ province: "Córdoba" });
-    expect(screen.getByText(/Todavía no enviamos a tu zona/i)).toBeTruthy();
+  it("sin tarifa para esa provincia avisa que no se envía todavía", async () => {
+    const { BRANCH_RATES } = await import("@/lib/shippingCost");
+    BRANCH_RATES.centro = null; // simula una zona todavía sin tarifa
+    try {
+      renderForm();
+      chooseBranch();
+      fill({ province: "Santa Fe" });
+      expect(screen.getByText(/Todavía no enviamos a tu zona/i)).toBeTruthy();
+    } finally {
+      BRANCH_RATES.centro = 7500;
+    }
   });
 
   it("volver a domicilio vuelve a pedir la dirección", () => {

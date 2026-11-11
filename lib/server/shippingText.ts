@@ -1,6 +1,5 @@
 import "server-only";
 import type { Shipping } from "@/lib/shipping";
-import { PICKUP_POINT } from "@/lib/shippingCost";
 
 /**
  * Datos de envío para los mails al dueño, en el mismo orden y con los mismos nombres que el formulario
@@ -17,7 +16,7 @@ export function shippingLines(s: Partial<Shipping>): string[] {
   ];
 
   if (s.method === "pickup") {
-    return ["RETIRA EN CÓRDOBA (no hay que enviar):", `  ${PICKUP_POINT}`, `  Indicaciones: ${v(s.notes)}`, "", "Comprador:", ...contact];
+    return ["RETIRA EN CÓRDOBA (no hay que enviar):", "  Hay que coordinar día y lugar con el comprador por Instagram.", `  Indicaciones: ${v(s.notes)}`, "", "Comprador:", ...contact];
   }
   if (s.method === "branch") {
     return [

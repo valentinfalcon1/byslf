@@ -6,7 +6,8 @@ import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { formatPrice } from "@/lib/format";
 import { goTo } from "@/lib/navigate";
 import { EMPTY_SHIPPING, PROVINCES, validateShipping, type Shipping, type ShippingErrors } from "@/lib/shipping";
-import { FREE_SHIPPING_OVER, PICKUP_POINT, homeDeliveryEnabled, quoteShipping, type DeliveryMethod } from "@/lib/shippingCost";
+import { SOCIAL } from "@/lib/site";
+import { FREE_SHIPPING_OVER, homeDeliveryEnabled, quoteShipping, type DeliveryMethod } from "@/lib/shippingCost";
 import { Button } from "./Button";
 import { useCart } from "./cart/CartProvider";
 import { ChevronDownIcon } from "./icons";
@@ -166,7 +167,7 @@ export function CheckoutForm() {
 
         {pickup && (
           <p className="label rounded-btn border border-line bg-surface p-4 text-star">
-            Retirás en: <span className="font-bold text-paper">{PICKUP_POINT}</span>. Te avisamos por mail cuando esté listo.
+            Si vas a retirar en persona, <span className="font-bold text-paper">escribinos por Instagram (@{SOCIAL.instagram.user})</span> con tu número de pedido y coordinamos el día y el lugar.
           </p>
         )}
         {branch && (

@@ -2,7 +2,6 @@ import "server-only";
 import { getProduct } from "@/data/products";
 import { BUSINESS, POLICY } from "@/lib/legal";
 import type { Shipping } from "@/lib/shipping";
-import { PICKUP_POINT } from "@/lib/shippingCost";
 import { SOCIAL } from "@/lib/site";
 import { TRANSFER_ACCOUNT, orderCode } from "@/lib/transfer";
 import { sendMail } from "./mail";
@@ -24,7 +23,7 @@ async function itemLines(items: OrderLine[]): Promise<string[]> {
 }
 
 function deliveryLines(s: Partial<Shipping>): string[] {
-  if (s.method === "pickup") return ["Retiro en Córdoba:", `  ${PICKUP_POINT}`, "  Te avisamos por mail o Instagram cuando esté listo."];
+  if (s.method === "pickup") return ["Retiro en Córdoba:", `  Escribinos por Instagram (@${SOCIAL.instagram.user}) con tu número de pedido y coordinamos el día y el lugar.`];
   if (s.method === "branch") return ["Envío a sucursal de Correo Argentino:", `  ${s.branch ?? "-"} (${s.province ?? "-"})`];
   const address = `${s.street ?? ""} ${s.number ?? ""}${s.floor ? `, ${s.floor}` : ""}`.trim();
   return ["Envío a domicilio:", `  ${address || "-"}`, `  ${s.city ?? "-"}, ${s.province ?? "-"} (CP ${s.zip ?? "-"})`];

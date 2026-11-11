@@ -265,10 +265,16 @@ describe("stock", () => {
     const BRANCH = { method: "branch", province: "Santa Fe", branch: "Sucursal Rosario Centro", street: "", number: "", floor: "", city: "", zip: "" };
 
     it("a sucursal sin tarifa cargada no se vende (y no se reserva stock)", async () => {
-      const res = await buy({ shipping: { ...BRANCH, province: "Córdoba" } });
-      expect(res.status).toBe(422);
-      expect(await stockOf()).toBe(3);
-      expect(await orders()).toHaveLength(0);
+      const { BRANCH_RATES } = await import("@/lib/shippingCost");
+      BRANCH_RATES.centro = null; // simula una zona todavía sin tarifa
+      try {
+        const res = await buy({ shipping: BRANCH });
+        expect(res.status).toBe(422);
+        expect(await stockOf()).toBe(3);
+        expect(await orders()).toHaveLength(0);
+      } finally {
+        BRANCH_RATES.centro = 7500;
+      }
     });
 
     it("a sucursal sin sucursal elegida se rechaza antes de reservar", async () => {

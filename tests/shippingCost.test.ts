@@ -106,14 +106,14 @@ describe("envío a sucursal", () => {
   });
 
   it("supera los $100.000: gratis aunque no haya tarifa", () => {
-    expect(quoteShipping("branch", "Córdoba", "", FREE_SHIPPING_OVER + 1, BRANCH_RATES)).toEqual({ ok: true, cost: 0, free: "threshold" });
-    expect(quoteShipping("branch", "Córdoba", "", FREE_SHIPPING_OVER, BRANCH_RATES)).toEqual({ ok: false, reason: "no_rate" });
+    const SIN_TARIFA = { ...BRANCH_RATES, interior: null };
+    expect(quoteShipping("branch", "Salta", "", FREE_SHIPPING_OVER + 1, SIN_TARIFA)).toEqual({ ok: true, cost: 0, free: "threshold" });
+    expect(quoteShipping("branch", "Salta", "", FREE_SHIPPING_OVER, SIN_TARIFA)).toEqual({ ok: false, reason: "no_rate" });
   });
 
-  it("a sucursal: Córdoba sigue sin tarifa (no se vende) y el resto del país tiene la suya", () => {
-    expect(BRANCH_RATES.capital).toBeNull();
-    expect(BRANCH_RATES.cordoba).toBeNull();
-    expect(quoteShipping("branch", "Córdoba", "", 5000)).toEqual({ ok: false, reason: "no_rate" });
+  it("a sucursal: todo el país tiene su tarifa (Córdoba $6.800)", () => {
+    expect(quoteShipping("branch", "Córdoba", "", 5000)).toEqual({ ok: true, cost: 6800, free: null });
+    expect(BRANCH_RATES.capital).toBe(6800);
     expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: true, cost: 7500, free: null });
     expect(quoteShipping("branch", "Salta", "", 5000)).toEqual({ ok: true, cost: 7500, free: null });
     expect(quoteShipping("branch", "Chubut", "", 5000)).toEqual({ ok: true, cost: 7800, free: null });

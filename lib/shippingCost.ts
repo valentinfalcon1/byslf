@@ -15,8 +15,6 @@ export const homeDeliveryEnabled = () => process.env.NEXT_PUBLIC_HOME_DELIVERY =
 /** Envío gratis cuando el subtotal de los productos supera este monto (en pesos). */
 export const FREE_SHIPPING_OVER = 100_000;
 
-/** Dónde se retira el pedido (gratis, para cualquier comprador). */
-export const PICKUP_POINT = "[PUNTO DE RETIRO EN CÓRDOBA]";
 
 /** Códigos postales de la ciudad de Córdoba (capital). ⚠ Verificalos con el correo antes de lanzar: de esto depende qué envíos son gratis. */
 export const CORDOBA_CAPITAL_ZIPS = { from: 5000, to: 5016 };
@@ -48,8 +46,8 @@ export const RATES: Record<Zone, number | null> = {
  * Acá no hay "capital gratis": a sucursal solo es gratis si la compra supera FREE_SHIPPING_OVER o si cargás 0 en la zona.
  */
 export const BRANCH_RATES: Record<Zone, number | null> = {
-  capital: null, // [A DEFINIR]
-  cordoba: null, // [A DEFINIR]
+  capital: 6800,
+  cordoba: 6800,
   centro: 7500, // mismo valor que domicilio hasta cotizar sucursal por separado
   interior: 7500,
   patagonia: 7800,
