@@ -140,8 +140,8 @@ export function CheckoutForm() {
             <Field id="lastname" label="Apellido" error={errors.lastname}><input {...props("lastname", "family-name")} className={input} /></Field>
           </div>
           <Field id="email" label="Email" error={errors.email}><input {...props("email", "email")} type="email" inputMode="email" className={input} /></Field>
-          <div className="grid gap-5 sm:grid-cols-[9rem_1fr]">
-            <Field id="areaCode" label="Cód. de área (sin 0)" error={errors.areaCode}><input {...props("areaCode", "tel-area-code")} inputMode="numeric" placeholder="351" className={input} /></Field>
+          <div className="grid gap-5 sm:grid-cols-[11rem_1fr]">
+            <Field id="areaCode" label="Cód. área (sin 0)" error={errors.areaCode}><input {...props("areaCode", "tel-area-code")} inputMode="numeric" placeholder="351" className={input} /></Field>
             <Field id="phone" label="Celular (sin 15)" error={errors.phone}><input {...props("phone", "tel-local")} type="tel" inputMode="tel" placeholder="5551234" className={input} /></Field>
           </div>
           <Field id="dni" label="DNI" optional error={errors.dni}><input {...props("dni")} inputMode="numeric" className={input} /></Field>
