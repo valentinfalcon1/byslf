@@ -7,8 +7,8 @@ import { Stars } from "@/components/Stars";
 export const metadata: Metadata = { title: "Tu compra", robots: { index: false } };
 
 const COPY = {
-  success: { title: "Gracias por ser parte", body: "Recibimos tu pago. [TEXTO DE CONFIRMACIÓN — ej. te mandamos el detalle por mail]", cta: "Volver al inicio" },
-  pending: { title: "Pago en proceso", body: "Estamos esperando que se acredite tu pago. [TEXTO — ej. te avisamos por mail apenas se confirme]", cta: "Volver al inicio" },
+  success: { title: "Gracias por ser parte", body: "Hemos confirmado tu pago. Te mandamos el detalle de tu pedido por mail y te avisaremos por WhatsApp cuando sea enviado.", cta: "Volver al inicio" },
+  pending: { title: "Pago en proceso", body: "Estamos esperando que se acredite tu pago. Te avisamos por mail apenas se confirme.", cta: "Volver al inicio" },
   failure: { title: "No se pudo completar", body: "El pago no se realizó y no se te cobró. Tu carrito sigue como lo dejaste.", cta: "Volver a intentar" },
 } as const;
 
