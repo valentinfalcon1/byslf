@@ -33,7 +33,7 @@ export default function Terminos() {
       </LegalSection>
 
       <LegalSection title="4. Envíos">
-        <p>Enviamos a toda Argentina a través de Correo Argentino. Los plazos estimados, el costo y las condiciones están en <Link href="/legal/cambios-y-devoluciones">Cambios y devoluciones</Link>. Tenés que cargar un domicilio correcto y completo: no nos hacemos responsables por demoras causadas por datos erróneos.</p>
+        <p>Enviamos a toda Argentina a través de Correo Argentino. Los plazos estimados, el costo y las condiciones están en <Link href="/legal/cambios-y-devoluciones">Cambios y devoluciones</Link>. Tenés que cargar tus datos y la sucursal de destino correctamente: no nos hacemos responsables por demoras causadas por datos erróneos.</p>
       </LegalSection>
 
       <LegalSection title="5. Arrepentimiento, cambios y garantía">

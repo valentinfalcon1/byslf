@@ -113,3 +113,41 @@ describe("envío a sucursal de Correo Argentino", () => {
     expect(validateShipping({ ...valid, branch: "" }).ok).toBe(true);
   });
 });
+
+describe("envío a domicilio apagado (como en producción)", () => {
+  const prod = async (fn: () => void) => {
+    const { vi } = await import("vitest");
+    vi.stubEnv("NEXT_PUBLIC_HOME_DELIVERY", "false");
+    try { fn(); } finally { vi.unstubAllEnvs(); }
+  };
+
+  it("un pedido a domicilio se rechaza con un mensaje claro", async () => {
+    await prod(() => {
+      const r = validateShipping({ ...valid, method: "delivery" });
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.errors.method).toContain("sucursal");
+    });
+  });
+
+  it("sin método, se asume sucursal (y pide la sucursal, no la dirección)", async () => {
+    await prod(() => {
+      const r = validateShipping({ ...valid, street: "", number: "", city: "", zip: "" });
+      expect(r.ok).toBe(false);
+      if (!r.ok) {
+        expect(r.errors.branch).toBeTruthy();
+        expect(r.errors.street).toBeUndefined();
+      }
+    });
+  });
+
+  it("a sucursal y el retiro siguen funcionando", async () => {
+    await prod(() => {
+      expect(validateShipping({ ...valid, method: "branch", province: "Santa Fe", branch: "Rosario Centro" }).ok).toBe(true);
+      expect(validateShipping({ ...valid, method: "pickup" }).ok).toBe(true);
+    });
+  });
+
+  it("encendido con NEXT_PUBLIC_HOME_DELIVERY=true, el domicilio vuelve", () => {
+    expect(validateShipping({ ...valid, method: "delivery" }).ok).toBe(true);
+  });
+});

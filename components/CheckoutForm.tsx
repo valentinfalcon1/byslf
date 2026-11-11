@@ -6,7 +6,7 @@ import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { formatPrice } from "@/lib/format";
 import { goTo } from "@/lib/navigate";
 import { EMPTY_SHIPPING, PROVINCES, validateShipping, type Shipping, type ShippingErrors } from "@/lib/shipping";
-import { FREE_SHIPPING_OVER, PICKUP_POINT, quoteShipping, type DeliveryMethod } from "@/lib/shippingCost";
+import { FREE_SHIPPING_OVER, PICKUP_POINT, homeDeliveryEnabled, quoteShipping, type DeliveryMethod } from "@/lib/shippingCost";
 import { Button } from "./Button";
 import { useCart } from "./cart/CartProvider";
 import { ChevronDownIcon } from "./icons";
@@ -30,7 +30,7 @@ function Field({ id, label, error, optional, children }: { id: string; label: st
 
 export function CheckoutForm() {
   const { items, subtotal } = useCart();
-  const [form, setForm] = useState<Shipping>(EMPTY_SHIPPING);
+  const [form, setForm] = useState<Shipping>({ ...EMPTY_SHIPPING, method: homeDeliveryEnabled() ? "delivery" : "branch" });
   const [errors, setErrors] = useState<ShippingErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
@@ -153,7 +153,7 @@ export function CheckoutForm() {
             ["delivery", "Envío a domicilio", `Gratis en Córdoba capital y en compras de más de ${formatPrice(FREE_SHIPPING_OVER)}.`],
             ["branch", "Envío a sucursal de Correo Argentino", `Lo retirás en la sucursal que elijas. Gratis en compras de más de ${formatPrice(FREE_SHIPPING_OVER)}.`],
             ["pickup", "Retiro en Córdoba", "Gratis."],
-          ] as const).map(([value, title, hint]) => (
+          ] as const).filter(([value]) => value !== "delivery" || homeDeliveryEnabled()).map(([value, title, hint]) => (
             <label key={value} className={`flex cursor-pointer items-start gap-3 rounded-btn border bg-surface p-4 ${form.method === value ? "border-paper" : "border-line"}`}>
               <input type="radio" name="method" value={value} checked={form.method === value} onChange={() => setMethod(value)} className="mt-1 h-5 w-5 shrink-0 accent-paper" />
               <span>

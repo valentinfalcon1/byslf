@@ -13,5 +13,7 @@ export default defineConfig({
     include: ["tests/**/*.test.{ts,tsx}"],
     exclude: ["tests/e2e/**", "node_modules/**"],
     testTimeout: 30000,
+    // Las pruebas existentes cubren también el envío a domicilio: se lo habilita acá. Hay pruebas aparte con el valor de producción (apagado).
+    env: { NEXT_PUBLIC_HOME_DELIVERY: "true" },
   },
 });

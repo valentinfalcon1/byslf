@@ -50,13 +50,13 @@ export default function Cambios() {
       </LegalSection>
 
       <LegalSection title="Envíos">
-        <p>Hacemos envíos a toda Argentina a través de Correo Argentino, a domicilio o a la sucursal que elijas.</p>
+        <p>Hacemos envíos a toda Argentina a través de Correo Argentino, a la sucursal que elijas.</p>
         <ul>
           <li>Despachamos tu pedido dentro de <strong>{POLICY.dispatchDays} días hábiles</strong> desde que se acredita el pago.</li>
           <li>Correo Argentino lo entrega en un plazo estimado de <strong>{POLICY.deliveryDays} días hábiles</strong>, según el destino. Son plazos estimados: dependen del correo.</li>
           <li>Cuando despachamos te enviamos el código de seguimiento.</li>
           <li>El costo se calcula antes de pagar, según el destino. El envío es gratis en compras de más de {formatPrice(FREE_SHIPPING_OVER)}.</li>
-          <li>Tenés que cargar un domicilio (o una sucursal) correcto y completo. Si el pedido vuelve por datos incorrectos, el reenvío corre por tu cuenta.</li>
+          <li>Tenés que elegir una sucursal correcta y cargar tus datos de contacto completos. Si el pedido vuelve por datos incorrectos, el reenvío corre por tu cuenta.</li>
         </ul>
       </LegalSection>
     </LegalPage>

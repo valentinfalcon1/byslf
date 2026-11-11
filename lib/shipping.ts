@@ -1,5 +1,5 @@
 /** Datos de envío: tipo y validación compartidos entre el formulario (navegador) y la API (servidor). */
-import type { DeliveryMethod } from "./shippingCost";
+import { homeDeliveryEnabled, type DeliveryMethod } from "./shippingCost";
 
 export type Shipping = {
   /** A domicilio, a una sucursal de Correo Argentino, o retiro en Córdoba (sin domicilio no hace falta la dirección). */
@@ -48,9 +48,10 @@ export function validateShipping(input: unknown): { ok: true; value: Shipping } 
   const value = { ...EMPTY_SHIPPING };
   const errors: ShippingErrors = {};
 
-  // Sin método se asume envío a domicilio; cualquier otro valor se rechaza.
-  const method = raw.method === undefined || raw.method === "" ? "delivery" : raw.method;
+  // Sin método se asume el envío principal (a domicilio si está habilitado, si no a sucursal); cualquier otro valor se rechaza.
+  const method = raw.method === undefined || raw.method === "" ? (homeDeliveryEnabled() ? "delivery" : "branch") : raw.method;
   if (method !== "delivery" && method !== "branch" && method !== "pickup") errors.method = "Elegí cómo querés recibir el pedido.";
+  else if (method === "delivery" && !homeDeliveryEnabled()) errors.method = "Por ahora solo enviamos a sucursal de Correo Argentino.";
   else value.method = method;
   const home = value.method === "delivery";
   const branch = value.method === "branch";

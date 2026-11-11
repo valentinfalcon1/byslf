@@ -37,7 +37,7 @@ export default defineConfig({
       url: "http://localhost:3200",
       timeout: 180_000,
       reuseExistingServer: false,
-      env: { NEXT_DIST_DIR: ".next-e2e", NEXT_PUBLIC_LAUNCHED: "true", DEV_TEST_PRICE: "1000", ...NO_REAL_SERVICES },
+      env: { NEXT_DIST_DIR: ".next-e2e", NEXT_PUBLIC_LAUNCHED: "true", NEXT_PUBLIC_HOME_DELIVERY: "true", DEV_TEST_PRICE: "1000", ...NO_REAL_SERVICES },
     },
     {
       command: "npx next dev -p 3201",

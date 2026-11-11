@@ -82,7 +82,7 @@ describe("quoteShipping", () => {
   it("la tabla real: Córdoba capital gratis, el resto de Córdoba pendiente, y el país con tarifa", () => {
     expect(RATES.capital).toBe(0);
     expect(RATES.cordoba).toBeNull();
-    expect(RATES.centro).toBe(6739);
+    expect(RATES.centro).toBe(7500);
     expect(RATES.interior).toBe(7500);
     expect(RATES.patagonia).toBe(7800);
   });
@@ -114,7 +114,7 @@ describe("envío a sucursal", () => {
     expect(BRANCH_RATES.capital).toBeNull();
     expect(BRANCH_RATES.cordoba).toBeNull();
     expect(quoteShipping("branch", "Córdoba", "", 5000)).toEqual({ ok: false, reason: "no_rate" });
-    expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: true, cost: 6739, free: null });
+    expect(quoteShipping("branch", "Santa Fe", "", 5000)).toEqual({ ok: true, cost: 7500, free: null });
     expect(quoteShipping("branch", "Salta", "", 5000)).toEqual({ ok: true, cost: 7500, free: null });
     expect(quoteShipping("branch", "Chubut", "", 5000)).toEqual({ ok: true, cost: 7800, free: null });
   });

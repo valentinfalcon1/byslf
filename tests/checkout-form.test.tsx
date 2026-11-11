@@ -414,3 +414,18 @@ describe("envío a sucursal de Correo Argentino", () => {
     expect(document.getElementById("branch")).toBeNull();
   });
 });
+
+describe("envío a domicilio apagado (como en producción)", () => {
+  it("no se ofrece a domicilio y arranca en sucursal", () => {
+    vi.stubEnv("NEXT_PUBLIC_HOME_DELIVERY", "false");
+    try {
+      renderForm();
+      expect(screen.queryByLabelText(/Envío a domicilio/i)).toBeNull();
+      expect((screen.getByLabelText(/Envío a sucursal/i) as HTMLInputElement).checked).toBe(true);
+      expect(document.getElementById("street")).toBeNull();
+      expect(document.getElementById("branch")).not.toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});

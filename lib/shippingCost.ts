@@ -6,6 +6,12 @@
 /** delivery = a domicilio · branch = retiro en una sucursal de Correo Argentino · pickup = retiro en Córdoba (punto propio). */
 export type DeliveryMethod = "delivery" | "branch" | "pickup";
 
+/**
+ * ¿Se ofrece el envío a domicilio? Por ahora NO: se vende solo a sucursal de Correo Argentino (y retiro).
+ * Para reactivarlo, poné NEXT_PUBLIC_HOME_DELIVERY=true en Vercel y volvé a publicar. Es una función (no una constante) para poder probar los dos casos.
+ */
+export const homeDeliveryEnabled = () => process.env.NEXT_PUBLIC_HOME_DELIVERY === "true";
+
 /** Envío gratis cuando el subtotal de los productos supera este monto (en pesos). */
 export const FREE_SHIPPING_OVER = 100_000;
 
@@ -32,7 +38,7 @@ export const ZONE_LABEL: Record<Zone, string> = {
 export const RATES: Record<Zone, number | null> = {
   capital: 0, // envío gratis SOLO en Córdoba capital
   cordoba: null, // [A DEFINIR] resto de la provincia de Córdoba
-  centro: 6739, // cotización aproximada (Buenos Aires)
+  centro: 7500, // cotización aproximada (Buenos Aires: $6.739, redondeada)
   interior: 7500, // cotización aproximada (Corrientes, Jujuy)
   patagonia: 7800, // cotización aproximada (Chubut, Tierra del Fuego)
 };
@@ -44,7 +50,7 @@ export const RATES: Record<Zone, number | null> = {
 export const BRANCH_RATES: Record<Zone, number | null> = {
   capital: null, // [A DEFINIR]
   cordoba: null, // [A DEFINIR]
-  centro: 6739, // mismo valor que domicilio hasta cotizar sucursal por separado
+  centro: 7500, // mismo valor que domicilio hasta cotizar sucursal por separado
   interior: 7500,
   patagonia: 7800,
 };
