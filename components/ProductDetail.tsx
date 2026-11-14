@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { TRANSFER_DISCOUNT_PCT, transferPrice } from "@/lib/transfer";
 import { POLICY } from "@/lib/legal";
 import { sizeChartFor, type SizeChart } from "@/data/sizeCharts";
+import { DROP_DATE, LAUNCHED } from "@/lib/site";
 import { Button } from "./Button";
 import { useCart } from "./cart/CartProvider";
 import { CloseIcon, MinusIcon, PlusIcon } from "./icons";
@@ -127,7 +128,16 @@ export function ProductDetail({ product }: { product: Product }) {
           {missingSize && <p role="alert" className="label mt-3 text-paper">↑ Elegí tu talle primero.</p>}
         </fieldset>
 
-        <Button className="mt-8 w-full" onClick={addToCart}>Agregar al carrito</Button>
+        {LAUNCHED ? (
+          <Button className="mt-8 w-full" onClick={addToCart}>Agregar al carrito</Button>
+        ) : (
+          // Modo presentación: se ve todo pero todavía no se compra.
+          <div className="mt-8 rounded-btn border border-line bg-surface p-4">
+            <p className="label font-bold">Todavía no se puede comprar</p>
+            <p className="label mt-1 text-[11px] text-star">La tienda abre el {DROP_DATE?.replace(".", "/") ?? "???"}. Anotate al aviso y te escribimos.</p>
+            <Button href="/#newsletter" variant="secondary" className="mt-4 w-full">Quiero el aviso</Button>
+          </div>
+        )}
 
         <div className="mt-10 border-t border-line">
           {ACCORDIONS.map((a, i) => (

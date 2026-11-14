@@ -261,6 +261,29 @@ test.describe("animaciones e interacción de las cards", () => {
     await expect.poll(() => timer.locator('[data-unit="Seg"]').textContent(), { timeout: 4000 }).not.toBe(first);
   });
 
+  test("debajo del título hay una sección con la fecha y hora del lanzamiento y las 3 fotos borrosas en una sola fila", async ({ page }) => {
+    await page.goto("/");
+    const sec = page.locator("#avance");
+    await expect(sec.getByRole("heading", { level: 2 })).toHaveText("15/11 · 17hs");
+    const imgs = sec.locator("img");
+    await expect(imgs).toHaveCount(3);
+    const ys: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const img = imgs.nth(i);
+      expect(await img.getAttribute("alt")).toBe("");
+      expect(await img.evaluate((el) => getComputedStyle(el).filter)).toMatch(/blur\(/); // borrosas
+      ys.push((await img.boundingBox())!.y);
+    }
+    expect(new Set(ys.map(Math.round)).size).toBe(1); // las tres en la misma línea
+    // sale después del título principal y antes del Drop (que queda como estaba)
+    const title = (await page.getByRole("heading", { level: 1 }).boundingBox())!;
+    const drop = (await page.locator("#drop").boundingBox())!;
+    const s = (await sec.boundingBox())!;
+    expect(s.y).toBeGreaterThan(title.y);
+    expect(s.y).toBeLessThan(drop.y);
+    await expect(page.locator("#drop article")).toHaveCount(3);
+  });
+
   test("el lookbook se ve completo aunque la tienda esté cerrada (muestra el estilo de la marca)", async ({ page }) => {
     await page.goto("/");
     const imgs = page.locator("#lookbook img");

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CONSUMER_DEFENSE_URL } from "@/lib/legal";
-import { LAUNCHED, SOCIAL } from "@/lib/site";
+import { SHOP_VISIBLE, SOCIAL } from "@/lib/site";
 import { Button } from "./Button";
 import { InstagramIcon, TikTokIcon } from "./icons";
 import { Logo } from "./Logo";
@@ -9,7 +9,7 @@ import { Stars } from "./Stars";
 const COLUMNS = [
   {
     title: "Tienda",
-    links: LAUNCHED
+    links: SHOP_VISIBLE
       ? [
         { label: "Todo", href: "/tienda" },
         { label: "Remeras", href: "/tienda?cat=remeras" },

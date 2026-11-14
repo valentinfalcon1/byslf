@@ -13,13 +13,16 @@ import { Reveal } from "@/components/Reveal";
 import { Spotlight } from "@/components/Spotlight";
 import { TeaserGrid } from "@/components/TeaserGrid";
 import { getProducts } from "@/data/products";
-import { DROP_DATE, LAUNCHED } from "@/lib/site";
+import { DROP_DATE, LAUNCHED, LAUNCH_LABEL, SHOP_VISIBLE } from "@/lib/site";
 
 // El lookbook se ve siempre, también con la tienda cerrada: muestra el estilo de la marca.
 const LOOK = [
   { src: "poster-subte", alt: "Afiche con el logo BYSLF repetido, en una estación de subte con bancos azules", box: "aspect-[10/7]" },
   { src: "create-more", alt: "Las palabras CREATE MORE en letras negras, desenfocadas, sobre fondo claro", box: "aspect-[5/6]" },
 ];
+
+// Primer vistazo: remera negra, remera gris topo y bermuda (versiones borrosas, ver scripts/make-teaser-images.mjs).
+const AVANCE = ["/img/avance/01.jpg", "/img/avance/02.jpg", "/img/avance/03.jpg"];
 
 /** Retraso de la animación de entrada (CSS puro, funciona sin JavaScript). */
 const delay = (s: number) => ({ "--d": `${s}s` }) as CSSProperties;
@@ -49,7 +52,7 @@ export default async function Home() {
           )}
           <h1 className="rise display mt-6 text-4xl sm:text-6xl md:mt-10 md:text-7xl" style={delay(0.55)}>Create more</h1>
           <div className="rise mt-8 flex flex-wrap justify-center gap-6" style={delay(0.7)}>
-            {LAUNCHED ? <Button href="/tienda" className="pulse">Ver el drop</Button> : <Button href="#newsletter" className="pulse">Quiero el aviso</Button>}
+            {SHOP_VISIBLE ? <Button href="/tienda" className="pulse">{LAUNCHED ? "Ver el drop" : "Ver las prendas"}</Button> : <Button href="#newsletter" className="pulse">Quiero el aviso</Button>}
             <Button href="#lookbook" variant="secondary">Lookbook</Button>
           </div>
           <div className="rise label mt-12 flex items-center gap-6 text-star" style={delay(0.85)}>
@@ -62,6 +65,26 @@ export default async function Home() {
 
       <Marquee />
 
+      {/* Primer vistazo (solo con la tienda cerrada): fecha y hora del lanzamiento + las 3 prendas, borrosas y en una sola fila. */}
+      {!SHOP_VISIBLE && (
+        <section id="avance" className="container-x py-12 text-center md:py-16">
+          <Reveal>
+            <p className="label font-bold text-star">Presentación</p>
+            <h2 className="display mt-3 text-5xl md:text-7xl">{LAUNCH_LABEL}</h2>
+          </Reveal>
+          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-3 gap-3 md:gap-6">
+            {AVANCE.map((src, i) => (
+              <Reveal key={src} delay={i * 80}>
+                <div className="relative aspect-square overflow-hidden rounded-card border border-line bg-surface">
+                  {/* Ya viene chica y borrosa: el efecto de CSS solo la oscurece, no hay nada que revelar. */}
+                  <Image src={src} alt="" fill sizes="(min-width: 768px) 240px, 33vw" className="scale-110 object-cover blur-md brightness-[0.55] grayscale" />
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Lo nuevo / teaser del drop */}
       <section id="drop" className="container-x scroll-mt-24 py-16 md:py-24">
         <Reveal className="mb-10 flex items-end justify-between gap-4">
@@ -69,9 +92,9 @@ export default async function Home() {
             <h2 className="display text-5xl md:text-7xl">{LAUNCHED ? "Lo nuevo" : "Drop 001"}</h2>
             {!LAUNCHED && <DropDate dropDate={DROP_DATE} />}
           </div>
-          {LAUNCHED && <Link href="/tienda" className="label font-bold underline underline-offset-4 hover:text-star">Ver todo</Link>}
+          {SHOP_VISIBLE && <Link href="/tienda" className="label font-bold underline underline-offset-4 hover:text-star">Ver todo</Link>}
         </Reveal>
-        {LAUNCHED ? (
+        {SHOP_VISIBLE ? (
           <div className="mx-auto grid max-w-sm grid-cols-1 gap-6 sm:max-w-none sm:grid-cols-3 md:gap-8">
             {latest.map((p, i) => (
               <Reveal key={p.id} delay={i * 90}>

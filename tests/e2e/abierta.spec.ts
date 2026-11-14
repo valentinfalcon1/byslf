@@ -302,6 +302,11 @@ test.describe("tienda y producto", () => {
     await expect(table.locator("tr[aria-current=true] th")).toHaveText("M");
   });
 
+  test("con la tienda abierta no hay sección de lanzamiento (primer vistazo)", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#avance")).toHaveCount(0);
+  });
+
   test("con la tienda abierta no hay temporizador en la portada", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("hero-timer")).toHaveCount(0);

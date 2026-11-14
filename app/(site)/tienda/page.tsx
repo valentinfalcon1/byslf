@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ComingSoon } from "@/components/ComingSoon";
-import { LAUNCHED } from "@/lib/site";
+import { SHOP_VISIBLE } from "@/lib/site";
 import { Logo } from "@/components/Logo";
 import { Shop } from "@/components/Shop";
 import { CATEGORIES, getProducts, type Category } from "@/data/products";
@@ -9,7 +9,7 @@ import { CATEGORIES, getProducts, type Category } from "@/data/products";
 export const metadata: Metadata = { title: "Tienda" };
 
 export default async function TiendaPage({ searchParams }: { searchParams: Promise<{ cat?: string; drop?: string }> }) {
-  if (!LAUNCHED) return <ComingSoon />;
+  if (!SHOP_VISIBLE) return <ComingSoon />;
   const { cat, drop } = await searchParams;
   const products = await getProducts();
   const initialCat = (CATEGORIES.some((c) => c.value === cat) ? cat : "todo") as Category | "todo";
