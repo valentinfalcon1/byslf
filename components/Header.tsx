@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { DROP_DATE, LAUNCHED, PREVIEW, SHOP_VISIBLE } from "@/lib/site";
+import { DROP_DATE, LAUNCHED, PREVIEW } from "@/lib/site";
 import { useCart } from "./cart/CartProvider";
 import { BagIcon, CloseIcon, MenuIcon, SearchIcon } from "./icons";
 import { Logo } from "./Logo";
 
-const NAV = SHOP_VISIBLE
+const NAV = LAUNCHED
   ? [
       { href: "/tienda", label: "Tienda" },
       { href: "/tienda?drop=001", label: "Drop 001" },
@@ -33,7 +33,7 @@ export function Header() {
           {LAUNCHED ? (
             "Envíos a toda Argentina"
           ) : PREVIEW ? (
-            <Link href="/tienda" className="hover:underline">★★★ Drop 001 — Mirá las prendas. La tienda abre el {DROP_DATE?.replace(".", "/") ?? "???"} ★★★</Link>
+            <Link href="/#drop" className="hover:underline">★★★ Drop 001 — Mirá las prendas. La tienda abre el {DROP_DATE?.replace(".", "/") ?? "???"} ★★★</Link>
           ) : (
             <Link href="/#newsletter" className="hover:underline">★★★ Drop 001 — Próximamente. Anotate al aviso ★★★</Link>
           )}

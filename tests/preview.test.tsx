@@ -58,7 +58,7 @@ describe("modo presentación", () => {
     expect(screen.queryByText("Todavía no se puede comprar")).toBeNull();
   });
 
-  it("el encabezado no muestra carrito ni buscador, y sí el acceso a la tienda", async () => {
+  it("el encabezado no muestra carrito ni buscador ni enlace a la tienda", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_PREVIEW", "true");
     vi.stubEnv("NEXT_PUBLIC_LAUNCHED", "false");
@@ -67,6 +67,7 @@ describe("modo presentación", () => {
     render(<CartProvider><Header /></CartProvider>);
     expect(screen.queryByRole("button", { name: /^Carrito/ })).toBeNull();
     expect(screen.queryByRole("button", { name: "Buscar" })).toBeNull();
-    expect(screen.getAllByRole("link", { name: "Tienda" }).length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole("link", { name: "Tienda" }).length).toBe(0);
+    expect(screen.getAllByRole("link", { name: "Drop 001" })[0].getAttribute("href")).toBe("/#drop");
   });
 });

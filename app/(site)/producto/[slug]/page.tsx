@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { SHOP_VISIBLE } from "@/lib/site";
+import { LAUNCHED, PREVIEW } from "@/lib/site";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductDetail } from "@/components/ProductDetail";
 import { getProduct, getProducts } from "@/data/products";
@@ -14,11 +14,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const product = await getProduct((await params).slug);
-  return { title: SHOP_VISIBLE ? (product?.name ?? "Producto") : "Próximamente" };
+  return { title: LAUNCHED ? (product?.name ?? "Producto") : "Próximamente" };
 }
 
 export default async function ProductoPage({ params }: Params) {
-  if (!SHOP_VISIBLE) redirect("/tienda");
+  if (!LAUNCHED) redirect(PREVIEW ? "/#drop" : "/tienda");
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();

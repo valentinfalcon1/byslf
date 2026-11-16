@@ -12,19 +12,19 @@ import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { Spotlight } from "@/components/Spotlight";
 import { TeaserGrid } from "@/components/TeaserGrid";
-import { getProducts } from "@/data/products";
-import { DROP_DATE, LAUNCHED, LAUNCH_LABEL, SHOP_VISIBLE } from "@/lib/site";
+import { CATEGORIES, getProducts } from "@/data/products";
+import { DROP_DATE, LAUNCHED, LAUNCH_LABEL, PREVIEW, SHOP_VISIBLE } from "@/lib/site";
 
-// El lookbook se ve siempre, también con la tienda cerrada: muestra el estilo de la marca.
+// El lookbook se ve siempre, tambiÃ©n con la tienda cerrada: muestra el estilo de la marca.
 const LOOK = [
-  { src: "poster-subte", alt: "Afiche con el logo BYSLF repetido, en una estación de subte con bancos azules", box: "aspect-[10/7]" },
+  { src: "poster-subte", alt: "Afiche con el logo BYSLF repetido, en una estaciÃ³n de subte con bancos azules", box: "aspect-[10/7]" },
   { src: "create-more", alt: "Las palabras CREATE MORE en letras negras, desenfocadas, sobre fondo claro", box: "aspect-[5/6]" },
 ];
 
 // Primer vistazo: remera negra, remera gris topo y bermuda (versiones borrosas, ver scripts/make-teaser-images.mjs).
 const AVANCE = ["/img/avance/01.jpg", "/img/avance/02.jpg", "/img/avance/03.jpg"];
 
-/** Retraso de la animación de entrada (CSS puro, funciona sin JavaScript). */
+/** Retraso de la animaciÃ³n de entrada (CSS puro, funciona sin JavaScript). */
 const delay = (s: number) => ({ "--d": `${s}s` }) as CSSProperties;
 
 export default async function Home() {
@@ -40,7 +40,7 @@ export default async function Home() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="container-x relative flex flex-col items-center pb-10 pt-14 text-center md:pt-20">
           <p className="rise label font-bold text-star" style={delay(0.05)}>
-            <span aria-hidden="true">●</span> Drop 001 — {LAUNCHED ? "Disponible ahora" : "Próximamente"}
+            <span aria-hidden="true">â—</span> Drop 001 â€” {LAUNCHED ? "Disponible ahora" : "PrÃ³ximamente"}
           </p>
           <div className="pop mt-4 w-full max-w-[560px]" style={delay(0.2)}>
             <Logo variant="primary" priority className="floaty w-full" />
@@ -52,24 +52,24 @@ export default async function Home() {
           )}
           <h1 className="rise display mt-6 text-4xl sm:text-6xl md:mt-10 md:text-7xl" style={delay(0.55)}>Create more</h1>
           <div className="rise mt-8 flex flex-wrap justify-center gap-6" style={delay(0.7)}>
-            {SHOP_VISIBLE ? <Button href="/tienda" className="pulse">{LAUNCHED ? "Ver el drop" : "Ver las prendas"}</Button> : <Button href="#newsletter" className="pulse">Quiero el aviso</Button>}
+            {LAUNCHED ? <Button href="/tienda" className="pulse">Ver el drop</Button> : PREVIEW ? <Button href="#drop" className="pulse">Ver las prendas</Button> : <Button href="#newsletter" className="pulse">Quiero el aviso</Button>}
             <Button href="#lookbook" variant="secondary">Lookbook</Button>
           </div>
           <div className="rise label mt-12 flex items-center gap-6 text-star" style={delay(0.85)}>
             <span>EST. 2026</span>
             <GlobeIcon aria-hidden="true" />
-            <span>Córdoba / ARG</span>
+            <span>CÃ³rdoba / ARG</span>
           </div>
         </div>
       </Spotlight>
 
       <Marquee />
 
-      {/* Primer vistazo (solo con la tienda cerrada): fecha y hora del lanzamiento + las 3 prendas, borrosas y en una sola fila. */}
+      {/* PresentaciÃ³n (mientras la tienda no estÃ© abierta): fecha y hora del lanzamiento + las 3 prendas, borrosas y en una sola fila. */}
       {!SHOP_VISIBLE && (
         <section id="avance" className="container-x py-12 text-center md:py-16">
           <Reveal>
-            <p className="label font-bold text-star">Presentación</p>
+            <p className="label font-bold text-star">PresentaciÃ³n</p>
             <h2 className="display mt-3 text-5xl md:text-7xl">{LAUNCH_LABEL}</h2>
           </Reveal>
           <div className="mx-auto mt-8 grid max-w-3xl grid-cols-3 gap-3 md:gap-6">
@@ -92,13 +92,29 @@ export default async function Home() {
             <h2 className="display text-5xl md:text-7xl">{LAUNCHED ? "Lo nuevo" : "Drop 001"}</h2>
             {!LAUNCHED && <DropDate dropDate={DROP_DATE} />}
           </div>
-          {SHOP_VISIBLE && <Link href="/tienda" className="label font-bold underline underline-offset-4 hover:text-star">Ver todo</Link>}
+          {LAUNCHED && <Link href="/tienda" className="label font-bold underline underline-offset-4 hover:text-star">Ver todo</Link>}
         </Reveal>
-        {SHOP_VISIBLE ? (
+        {LAUNCHED ? (
           <div className="mx-auto grid max-w-sm grid-cols-1 gap-6 sm:max-w-none sm:grid-cols-3 md:gap-8">
             {latest.map((p, i) => (
               <Reveal key={p.id} delay={i * 90}>
                 <ProductCard product={p} priority={i < 2} />
+              </Reveal>
+            ))}
+          </div>
+        ) : PREVIEW ? (
+          /* PresentaciÃ³n: se ve la prenda pero el precio sigue oculto y no hay enlaces (no se entra a la tienda ni al detalle). */
+          <div className="mx-auto grid max-w-sm grid-cols-1 gap-6 sm:max-w-none sm:grid-cols-3 md:gap-8">
+            {latest.map((p, i) => (
+              <Reveal key={p.id} delay={i * 90}>
+                <div className="relative aspect-square overflow-hidden rounded-card border border-line bg-surface">
+                  <Image src={p.images[0]} alt={p.name} fill priority={i < 2} sizes="(min-width: 640px) 33vw, 100vw" className="object-cover" />
+                </div>
+                <div className="mt-4 space-y-1">
+                  <h3 className="label font-bold text-paper">{p.name}</h3>
+                  <p className="label text-star">{CATEGORIES.find((c) => c.value === p.category)?.label ?? p.category}</p>
+                  <p className="label font-bold text-paper">$ ?</p>
+                </div>
               </Reveal>
             ))}
           </div>

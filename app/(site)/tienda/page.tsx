@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ComingSoon } from "@/components/ComingSoon";
-import { SHOP_VISIBLE } from "@/lib/site";
+import { LAUNCHED, PREVIEW } from "@/lib/site";
 import { Logo } from "@/components/Logo";
 import { Shop } from "@/components/Shop";
 import { CATEGORIES, getProducts, type Category } from "@/data/products";
@@ -9,7 +10,11 @@ import { CATEGORIES, getProducts, type Category } from "@/data/products";
 export const metadata: Metadata = { title: "Tienda" };
 
 export default async function TiendaPage({ searchParams }: { searchParams: Promise<{ cat?: string; drop?: string }> }) {
-  if (!SHOP_VISIBLE) return <ComingSoon />;
+  // En la presentación no se entra a la tienda: solo se ven las fotos en el inicio.
+  if (!LAUNCHED) {
+    if (PREVIEW) redirect("/#drop");
+    return <ComingSoon />;
+  }
   const { cat, drop } = await searchParams;
   const products = await getProducts();
   const initialCat = (CATEGORIES.some((c) => c.value === cat) ? cat : "todo") as Category | "todo";
